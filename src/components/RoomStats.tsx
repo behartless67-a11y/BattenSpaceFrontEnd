@@ -119,21 +119,25 @@ function calculateAverageHoursPerDay(events: CalendarEvent[], daysToCheck: numbe
   return Math.round(averageHoursPerDay * 10) / 10;
 }
 
-export function RoomStats() {
+interface RoomStatsProps {
+  selectedTimeRange: 'day' | 'week' | 'month';
+  selectedRoom: string;
+}
+
+export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month'>('week');
 
   useEffect(() => {
     fetchStats();
     // Refresh every 15 minutes
     const interval = setInterval(fetchStats, 15 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [timeRange]);
+  }, [selectedTimeRange, selectedRoom]);
 
   const getDaysForRange = () => {
-    switch (timeRange) {
+    switch (selectedTimeRange) {
       case 'day': return 1;
       case 'week': return 7;
       case 'month': return 30;
@@ -144,8 +148,9 @@ export function RoomStats() {
   const fetchStats = async () => {
     try {
       const daysToCheck = getDaysForRange();
+      const roomsToFetch = selectedRoom === 'all' ? ROOMS : ROOMS.filter(r => r.id === selectedRoom);
       const roomStats = await Promise.all(
-        ROOMS.map(async (room) => {
+        roomsToFetch.map(async (room) => {
           try {
             const response = await fetch(`${AZURE_FUNCTION_URL}?room=${room.id}`);
 
@@ -245,45 +250,9 @@ export function RoomStats() {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-100">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <BarChart className="w-6 h-6 text-uva-orange" />
-          <h2 className="text-2xl font-bold text-uva-navy">Room Usage Statistics</h2>
-        </div>
-
-        {/* Time Range Filter */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setTimeRange('day')}
-            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
-              timeRange === 'day'
-                ? 'bg-uva-orange text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Today
-          </button>
-          <button
-            onClick={() => setTimeRange('week')}
-            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
-              timeRange === 'week'
-                ? 'bg-uva-orange text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Week
-          </button>
-          <button
-            onClick={() => setTimeRange('month')}
-            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
-              timeRange === 'month'
-                ? 'bg-uva-orange text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Month
-          </button>
-        </div>
+      <div className="flex items-center gap-3 mb-6">
+        <BarChart className="w-6 h-6 text-uva-orange" />
+        <h2 className="text-2xl font-bold text-uva-navy">Room Usage Statistics</h2>
       </div>
 
       {/* Summary Cards */}
@@ -295,7 +264,7 @@ export function RoomStats() {
           </div>
           <p className="text-3xl font-bold">{stats.summary.averageHoursAcrossRooms}</p>
           <p className="text-xs opacity-75 mt-1">
-            {timeRange === 'day' ? 'Today' : timeRange === 'week' ? '7-day' : '30-day'} average, all rooms
+            {selectedTimeRange === 'day' ? 'Today' : selectedTimeRange === 'week' ? '7-day' : '30-day'} average, all rooms
           </p>
         </div>
 
@@ -322,7 +291,7 @@ export function RoomStats() {
       <div>
         <h3 className="text-lg font-bold text-uva-navy mb-3">Most Used Rooms</h3>
         <p className="text-sm text-gray-600 mb-3">
-          Average hours per day over the last {timeRange === 'day' ? 'day' : timeRange === 'week' ? '7 days' : '30 days'}
+          Average hours per day over the last {selectedTimeRange === 'day' ? 'day' : selectedTimeRange === 'week' ? '7 days' : '30 days'}
         </p>
         <div className="space-y-2">
           {topRooms.map((room, index) => (

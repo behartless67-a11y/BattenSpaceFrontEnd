@@ -6,6 +6,8 @@ import { RoomStats } from "@/components/RoomStats";
 import { CurrentStatus } from "@/components/CurrentStatus";
 import { UsageTrends } from "@/components/UsageTrends";
 import { PeakHoursHeatmap } from "@/components/PeakHoursHeatmap";
+import { CapacityAnalysis } from "@/components/CapacityAnalysis";
+import { ExportReports } from "@/components/ExportReports";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { UserInfo } from "@/types/auth";
@@ -158,21 +160,14 @@ export default function RoomAnalytics() {
           <PeakHoursHeatmap selectedRoom={selectedRoom} />
         </div>
 
-        {/* Placeholder for future analytics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-100">
-            <h3 className="text-xl font-bold text-uva-navy mb-3">Coming Soon: Capacity Analysis</h3>
-            <p className="text-gray-600">
-              Detailed insights into room capacity utilization and recommendations for optimal scheduling.
-            </p>
-          </div>
+        {/* Row 4: Capacity Analysis (full width) */}
+        <div className="mb-8">
+          <CapacityAnalysis selectedTimeRange={selectedTimeRange} selectedRoom={selectedRoom} />
+        </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-100">
-            <h3 className="text-xl font-bold text-uva-navy mb-3">Coming Soon: Export Reports</h3>
-            <p className="text-gray-600">
-              Download detailed usage reports in CSV or PDF format for administrative review.
-            </p>
-          </div>
+        {/* Row 5: Export Reports (full width) */}
+        <div className="mb-8">
+          <ExportReports selectedTimeRange={selectedTimeRange} selectedRoom={selectedRoom} />
         </div>
       </main>
 

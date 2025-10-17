@@ -2,7 +2,7 @@
 **Date:** October 17, 2025
 
 ## Summary
-Enhanced the Batten Space portal with a new Room Analytics tool, improved UI layout, and integrated live room usage statistics from the existing Azure Function API.
+Enhanced the Batten Space portal with a new Room Analytics tool, improved UI layout, and integrated live room usage statistics from the existing Azure Function API. Added comprehensive analytics features including real-time status, usage trends, and peak hours heatmap, all controlled by global filter dropdowns.
 
 ---
 
@@ -38,6 +38,31 @@ A dedicated standalone page for facilities management to view detailed room usag
 **Rooms Tracked:**
 - Garrett Hall: Conference Room A L014, Great Hall 100, Seminar Room L039, Student Lounge 206
 - Pavilion X: Upper Garden, Basement Room 1, Basement Room 2, Basement Exhibit
+
+### 2. Global Filter Controls
+A centralized filter system at the top of the Room Analytics page that controls all analytics components.
+
+**Location:** `/room-analytics` (top of page)
+
+**Features:**
+- **Time Range Dropdown:** Select day/week/month to adjust time window for all analytics
+- **Room Dropdown:** Filter to view specific room or all rooms combined
+- Single source of truth for filter state
+- All components update automatically when filters change
+- Clean, consistent UX without duplicate controls
+
+**Components Affected:**
+- **Room Stats:** Shows filtered room data with selected time range
+- **Usage Trends:** Displays 1/14/30 days of trend data based on selection
+- **Peak Hours Heatmap:** Shows heatmap for selected room or all rooms
+- **Current Status:** Filters to show selected room or all rooms
+
+**Technical Implementation:**
+- State managed in [room-analytics/page.tsx](src/app/room-analytics/page.tsx:28-29)
+- Filter props passed to all child components
+- Components fetch only selected room data when individual room chosen
+- Dynamic labels update to reflect selected time range
+- No component has duplicate filter controls
 
 ---
 
@@ -218,8 +243,39 @@ Based on the placeholder cards in Room Analytics page:
 
 ---
 
-## Git Commit
+## Git Commits
 
+### Commit 2: Global Filter Controls
+**Commit Hash:** `9ae1127`
+**Date:** October 17, 2025
+
+**Commit Message:**
+```
+Add global filter controls to Room Analytics page
+
+Major features:
+- Add global dropdown filters at top of Room Analytics page for date range (day/week/month) and room selection
+- Centralized filter state management in room-analytics page
+- All analytics components (RoomStats, UsageTrends, PeakHoursHeatmap, CurrentStatus) now accept filter props
+- Removed individual filter controls from components for consistent UX
+- Components dynamically update based on global filter selections
+
+Technical changes:
+- Update room-analytics page to manage selectedTimeRange and selectedRoom state
+- Pass filter props to all child analytics components
+- Filter rooms to fetch based on selected room (all vs individual)
+- Update component titles and labels to reflect selected time range
+- Components refresh data when filters change
+```
+
+**Files Changed:**
+- [src/app/room-analytics/page.tsx](src/app/room-analytics/page.tsx) - Added filter controls and state management
+- [src/components/RoomStats.tsx](src/components/RoomStats.tsx) - Accept filter props, removed internal time range state
+- [src/components/UsageTrends.tsx](src/components/UsageTrends.tsx) - Accept filter props, dynamic time range labels
+- [src/components/PeakHoursHeatmap.tsx](src/components/PeakHoursHeatmap.tsx) - Accept room filter prop, removed internal selector
+- [src/components/CurrentStatus.tsx](src/components/CurrentStatus.tsx) - Accept room filter prop
+
+### Commit 1: Room Analytics Tool
 **Commit Hash:** `4af7894`
 **Branch:** `main`
 **Remote:** `https://github.com/behartless67-a11y/BattenSpaceFrontEnd`

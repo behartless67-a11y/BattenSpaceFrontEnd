@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/bh4hb/OneDrive - University of Virginia/Desktop/AI_Working/TheBattenSpace/**)",
+      "Bash(dir \"C:\\Users\\bh4hb\\OneDrive - University of Virginia\\Desktop\\AI_Working\\TheBattenSpace\")",
+      "Bash(dir:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git fetch:*)",
+      "Bash(xcopy:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

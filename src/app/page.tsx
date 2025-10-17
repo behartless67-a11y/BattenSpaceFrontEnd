@@ -89,7 +89,26 @@ export default function Home() {
   const REQUIRED_GROUPS = ["FBS_StaffAll", "FBS_Community"];
 
   useEffect(() => {
-    // Fetch user info from Azure Easy Auth
+    // Check if we're in dev mode (local development)
+    const isDev = process.env.NODE_ENV === 'development';
+
+    if (isDev) {
+      // Mock user data for local development
+      const mockUser = {
+        clientPrincipal: {
+          identityProvider: 'aad',
+          userId: 'dev-user-123',
+          userDetails: 'Dev User (Local)',
+          userRoles: ['authenticated', 'FBS_StaffAll'],
+        }
+      };
+      setUserInfo(mockUser);
+      setHasAccess(true);
+      setLoading(false);
+      return;
+    }
+
+    // Fetch user info from Azure Easy Auth (production only)
     fetch('/.auth/me')
       .then(res => res.json())
       .then(data => {

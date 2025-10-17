@@ -1,12 +1,14 @@
 "use client";
 
-import { useMsal } from "@azure/msal-react";
+import { ClientPrincipal } from "@/types/auth";
 
-export function Header() {
-  const { instance, accounts } = useMsal();
+interface HeaderProps {
+  user?: ClientPrincipal | null;
+}
 
+export function Header({ user }: HeaderProps) {
   const handleLogout = () => {
-    instance.logout();
+    window.location.href = '/.auth/logout';
   };
 
   return (
@@ -18,10 +20,12 @@ export function Header() {
             <p className="text-sm text-gray-300">Frank Batten School Digital Tools</p>
           </div>
           <div className="flex items-center gap-4">
-            {accounts.length > 0 && (
+            {user && (
               <div className="text-right">
-                <p className="text-sm font-semibold">{accounts[0].name}</p>
-                <p className="text-xs text-gray-300">{accounts[0].username}</p>
+                <p className="text-sm font-semibold">{user.userDetails}</p>
+                <p className="text-xs text-gray-300">
+                  {user.userRoles.filter(role => role !== 'anonymous' && role !== 'authenticated').join(', ') || 'Staff'}
+                </p>
               </div>
             )}
             <button

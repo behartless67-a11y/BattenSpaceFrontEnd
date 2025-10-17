@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville, Inter } from "next/font/google";
 import "./globals.css";
-import { MsalProvider } from "@/components/MsalProvider";
 
 const serif = Libre_Baskerville({
   variable: "--font-serif",
@@ -27,9 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${serif.variable} ${sans.variable} antialiased`}>
-        <MsalProvider>
-          {children}
-        </MsalProvider>
+        {children}
       </body>
     </html>
   );

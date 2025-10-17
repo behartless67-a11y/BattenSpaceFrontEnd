@@ -4,8 +4,8 @@ A secure, Azure Entra ID authenticated frontend portal for The Batten Space digi
 
 ## Features
 
-- **Azure Entra ID Authentication**: Secure single sign-on using Microsoft Entra (formerly Azure AD)
-- **Group-based Access Control**: Restrict access to specific Entra security groups
+- **Azure Easy Auth**: Secure authentication using Azure Static Web Apps built-in auth
+- **Group-based Access Control**: Restricts access to `FBS_StaffAll` and `FBS_Community` groups
 - **Modern UI**: Built with Next.js, React, and Tailwind CSS
 - **UVA Branding**: Follows University of Virginia and Batten School design guidelines
 - **Static Export**: Optimized for Azure Static Web Apps deployment
@@ -16,174 +16,166 @@ A secure, Azure Entra ID authenticated frontend portal for The Batten Space digi
 - **Framework**: Next.js 15 (Static Export)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Authentication**: Azure MSAL (Microsoft Authentication Library)
+- **Authentication**: Azure Static Web Apps Easy Auth
 - **Deployment**: Azure Static Web Apps
 - **Hosting**: Azure with custom domain (thebattenspace.org)
 
 ## Prerequisites
 
 - Node.js 18+ and npm
-- Azure subscription with appropriate permissions
-- Azure Entra ID (formerly Azure AD) tenant
+- Azure subscription with Static Web Apps
+- Access to Azure Key Vault for client secret
 - GitHub account for CI/CD
 
-## Local Development Setup
+## Configuration Details (From Admin)
 
-### 1. Clone the Repository
+Your Azure admin has already configured:
 
-```bash
-git clone https://github.com/behartless67-a11y/BattenSpaceFrontEnd.git
-cd BattenSpaceFrontEnd
-```
+- **Client ID**: `0b45a06e-6b4a-4c3e-80ff-01d0c11a9def`
+- **Tenant ID**: `7b3480c7-3707-4873-8b77-e216733a65ac`
+- **Client Secret**: Stored in Azure Key Vault (see below)
+- **Authorized Groups**: `FBS_StaffAll`, `FBS_Community`
+- **Redirect URIs** (already configured in app registration):
+  - `https://appexplorer.thebattenspace.org/.auth/login/aad/callback`
+  - `https://calm-rock-0599eab0f.1.azurestaticapps.net/.auth/login/aad/callback`
+  - `https://www.thebattenspace.org/.auth/login/aad/callback`
 
-### 2. Install Dependencies
+### Client Secret Location
 
-```bash
-npm install
-```
+The client secret is stored in Azure Key Vault:
+- **Key Vault**: eieide2kv
+- **Secret Name**: kvs-6582dc3a-472c-4589-8f88-d4025fc47bfe
+- **Access URL**: https://portal.azure.com/#@myuva.onmicrosoft.com/asset/Microsoft_Azure_KeyVault/Secret/https://eieide2kv.vault.azure.net/secrets/kvs-6582dc3a-472c-4589-8f88-d4025fc47bfe/de56ef8f000e4b6badb6dc5be56f7ef5
 
-### 3. Configure Environment Variables
+**Important**: Use your eservices account (not SA account) to access the Key Vault. You'll receive automated emails every 6 months when the secret is rotated.
 
-Copy the example environment file:
+## Azure Static Web App Setup
 
-```bash
-cp .env.example .env.local
-```
+### Step 1: Configure Easy Auth (Custom)
 
-Edit `.env.local` and fill in your Azure Entra ID values:
+1. Go to your Azure Static Web App in the Azure Portal
+2. Navigate to **Configuration** > **Authentication**
+3. Click **Add** to add a custom identity provider
+4. Select **Azure Active Directory**
+5. Configure the following:
 
-```env
-NEXT_PUBLIC_AZURE_CLIENT_ID=your-client-id-here
-NEXT_PUBLIC_AZURE_TENANT_ID=your-tenant-id-here
-NEXT_PUBLIC_REDIRECT_URI=http://localhost:3000
-NEXT_PUBLIC_POST_LOGOUT_REDIRECT_URI=http://localhost:3000
-NEXT_PUBLIC_AUTHORIZED_GROUPS=group-id-1,group-id-2
-```
+   **App registration**:
+   - Registration type: **Provide app registration details**
+   - Application (client) ID: `0b45a06e-6b4a-4c3e-80ff-01d0c11a9def`
+   - Client secret: Get from Azure Key Vault (see above)
+   - OpenID issuer URL: `https://login.microsoftonline.com/7b3480c7-3707-4873-8b77-e216733a65ac/v2.0`
 
-### 4. Run Development Server
+   **Allowed token audiences**: (optional)
+   - `api://0b45a06e-6b4a-4c3e-80ff-01d0c11a9def`
 
-```bash
-npm run dev
-```
+6. Click **Add** to save
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### Step 2: Configure Environment Variables in Azure
 
-## Azure Setup
+Go to **Configuration** > **Application settings** and add:
 
-### Step 1: Create Azure App Registration
+| Name | Value |
+|------|-------|
+| `AZURE_CLIENT_ID` | `0b45a06e-6b4a-4c3e-80ff-01d0c11a9def` |
+| `AZURE_CLIENT_SECRET` | Get from Key Vault (see above) |
+| `AZURE_TENANT_ID` | `7b3480c7-3707-4873-8b77-e216733a65ac` |
 
-1. Go to [Azure Portal](https://portal.azure.com)
-2. Navigate to **Azure Active Directory** > **App registrations**
-3. Click **New registration**
-4. Configure:
-   - **Name**: The Batten Space Frontend
-   - **Supported account types**: Accounts in this organizational directory only
-   - **Redirect URI**:
-     - Type: Single-page application (SPA)
-     - URI: `https://thebattenspace.org` (for production)
-     - URI: `http://localhost:3000` (for development)
-5. Click **Register**
-6. Note down:
-   - **Application (client) ID**
-   - **Directory (tenant) ID**
+### Step 3: GitHub Secrets
 
-### Step 2: Configure API Permissions
+No GitHub secrets are required! The authentication is handled entirely by Azure Static Web Apps Easy Auth. The GitHub Actions workflow only needs:
 
-1. In your App Registration, go to **API permissions**
-2. Click **Add a permission**
-3. Select **Microsoft Graph**
-4. Choose **Delegated permissions**
-5. Add these permissions:
-   - `User.Read`
-   - `GroupMember.Read.All`
-6. Click **Add permissions**
-7. Click **Grant admin consent** (requires admin privileges)
+- `AZURE_STATIC_WEB_APPS_API_TOKEN` - Your deployment token from Azure
 
-### Step 3: Configure Authentication
-
-1. In your App Registration, go to **Authentication**
-2. Under **Single-page application**, ensure your redirect URIs are listed:
-   - `https://thebattenspace.org`
-   - `http://localhost:3000` (for development)
-3. Under **Implicit grant and hybrid flows**, ensure:
-   - **Access tokens** is checked
-   - **ID tokens** is checked
-4. Under **Allow public client flows**: Set to **No**
-5. Click **Save**
-
-### Step 4: Get Authorized Group IDs
-
-1. Go to **Azure Active Directory** > **Groups**
-2. Find the security groups that should have access
-3. Click on each group and note the **Object ID**
-4. Add these IDs (comma-separated) to your environment variables
-
-### Step 5: Create Azure Static Web App
-
-1. In Azure Portal, click **Create a resource**
-2. Search for **Static Web App** and select it
-3. Click **Create**
-4. Configure:
-   - **Subscription**: Your subscription
-   - **Resource Group**: Create or select existing
-   - **Name**: batten-space-frontend
-   - **Plan type**: Free or Standard
-   - **Region**: East US 2 (or closest to you)
-   - **Source**: GitHub
-   - **Organization**: behartless67-a11y
-   - **Repository**: BattenSpaceFrontEnd
-   - **Branch**: main
-   - **Build Presets**: Next.js
-   - **App location**: /
-   - **Output location**: out
-5. Click **Review + create**, then **Create**
-6. After deployment, note the **deployment token**
-
-### Step 6: Configure Custom Domain
-
-1. In your Azure Static Web App resource, go to **Custom domains**
-2. Click **Add**
-3. Choose **Custom domain on other DNS**
-4. Enter: `thebattenspace.org`
-5. Follow the instructions to add DNS records:
-   - Add a CNAME record pointing to your Azure Static Web App URL
-   - Or add a TXT record for validation
-6. Wait for DNS propagation (can take up to 48 hours)
-7. Azure will automatically provision a free SSL certificate
-
-### Step 7: Configure GitHub Secrets
-
-1. Go to your GitHub repository: https://github.com/behartless67-a11y/BattenSpaceFrontEnd
+To add this:
+1. Go to your repository: https://github.com/behartless67-a11y/BattenSpaceFrontEnd
 2. Navigate to **Settings** > **Secrets and variables** > **Actions**
-3. Add the following secrets:
-   - `AZURE_STATIC_WEB_APPS_API_TOKEN`: Your deployment token from Step 5
-   - `AZURE_CLIENT_ID`: Your Application (client) ID from Step 1
-   - `AZURE_TENANT_ID`: Your Directory (tenant) ID from Step 1
-   - `REDIRECT_URI`: `https://thebattenspace.org`
-   - `POST_LOGOUT_REDIRECT_URI`: `https://thebattenspace.org`
-   - `AUTHORIZED_GROUPS`: Comma-separated group IDs from Step 4
+3. Add **New repository secret**:
+   - Name: `AZURE_STATIC_WEB_APPS_API_TOKEN`
+   - Value: Get from Azure Portal > Your Static Web App > Overview > Manage deployment token
 
-## Deployment
+### Step 4: Deploy
 
-The application automatically deploys to Azure Static Web Apps when you push to the `main` branch.
-
-### Manual Deployment
-
-If you need to trigger a manual deployment:
+Push to the `main` branch and GitHub Actions will automatically build and deploy your app!
 
 ```bash
-npm run build
-```
-
-Then push the changes:
-
-```bash
-git add .
-git commit -m "Your commit message"
 git push origin main
 ```
 
-The GitHub Actions workflow will automatically build and deploy your application.
+## Local Development
+
+For local development, Easy Auth won't work (it requires Azure infrastructure). To test locally:
+
+```bash
+npm install
+npm run dev
+```
+
+**Note**: Authentication will not work locally. You'll need to test auth features in your deployed Azure environment.
+
+## How It Works
+
+### Authentication Flow
+
+1. User visits the site
+2. Azure Static Web Apps Easy Auth checks if user is authenticated
+3. If not, redirects to `/.auth/login/aad`
+4. User logs in with UVA credentials
+5. Azure validates credentials and group membership
+6. User is redirected back to the app with authentication cookie
+7. Frontend checks user's groups via `/.auth/me` endpoint
+8. If user is in `FBS_StaffAll` or `FBS_Community`, they see the dashboard
+9. If not, they see an "Access Denied" message
+
+### Group Membership Check
+
+The app checks for group membership in [src/app/page.tsx](src/app/page.tsx):
+
+```typescript
+const REQUIRED_GROUPS = ["FBS_StaffAll", "FBS_Community"];
+```
+
+To modify which groups have access, edit this array.
+
+### Easy Auth Endpoints
+
+Azure Static Web Apps provides these built-in endpoints:
+
+- `/.auth/login/aad` - Initiates Azure AD login
+- `/.auth/logout` - Logs out the user
+- `/.auth/me` - Returns current user info and roles
+
+## Project Structure
+
+```
+BattenSpaceFrontEnd/
+├── .github/
+│   └── workflows/
+│       └── azure-static-web-apps.yml    # CI/CD workflow
+├── public/
+│   └── garrett-hall-sunset.jpg          # Background image
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── auth/
+│   │   │       └── me/
+│   │   │           └── route.ts         # User info API route
+│   │   ├── layout.tsx                   # Root layout with fonts
+│   │   ├── page.tsx                     # Main page with auth checks
+│   │   └── globals.css                  # Global styles
+│   ├── components/
+│   │   ├── Header.tsx                   # Header with user info
+│   │   └── Footer.tsx                   # Footer component
+│   └── types/
+│       └── auth.ts                      # TypeScript types for auth
+├── .env.example                         # Environment variables reference
+├── .gitignore                           # Git ignore rules
+├── next.config.js                       # Next.js configuration
+├── package.json                         # Dependencies
+├── staticwebapp.config.json             # Azure Easy Auth configuration
+├── tailwind.config.js                   # Tailwind CSS configuration
+├── tsconfig.json                        # TypeScript configuration
+└── README.md                            # This file
+```
 
 ## Configuration
 
@@ -207,9 +199,13 @@ const tools: Tool[] = [
 
 ### Modifying Access Control
 
-To change which groups can access the application, update the `NEXT_PUBLIC_AUTHORIZED_GROUPS` environment variable with comma-separated Entra group IDs.
+To change which groups can access the application, edit the `REQUIRED_GROUPS` array in [src/app/page.tsx](src/app/page.tsx):
 
-To allow all authenticated users (no group restrictions), leave `NEXT_PUBLIC_AUTHORIZED_GROUPS` empty.
+```typescript
+const REQUIRED_GROUPS = ["FBS_StaffAll", "FBS_Community", "YourNewGroup"];
+```
+
+The app will grant access if the user is in **ANY** of the listed groups.
 
 ### Customizing Branding
 
@@ -218,82 +214,84 @@ To allow all authenticated users (no group restrictions), leave `NEXT_PUBLIC_AUT
 - **Background Image**: Replace [public/garrett-hall-sunset.jpg](public/garrett-hall-sunset.jpg)
 - **Header/Footer**: Edit [src/components/Header.tsx](src/components/Header.tsx) and [src/components/Footer.tsx](src/components/Footer.tsx)
 
-## Project Structure
+## Deployment
 
-```
-BattenSpaceFrontEnd/
-├── .github/
-│   └── workflows/
-│       └── azure-static-web-apps.yml    # CI/CD workflow
-├── public/
-│   └── garrett-hall-sunset.jpg          # Background image
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx                   # Root layout with fonts
-│   │   ├── page.tsx                     # Main landing page
-│   │   └── globals.css                  # Global styles
-│   ├── components/
-│   │   ├── AuthGuard.tsx                # Authentication wrapper
-│   │   ├── MsalProvider.tsx             # MSAL provider wrapper
-│   │   ├── Header.tsx                   # Header component
-│   │   └── Footer.tsx                   # Footer component
-│   ├── config/
-│   │   └── authConfig.ts                # Azure MSAL configuration
-│   └── lib/                             # Utility functions
-├── .env.example                         # Environment variables template
-├── .gitignore                           # Git ignore rules
-├── next.config.js                       # Next.js configuration
-├── package.json                         # Dependencies
-├── staticwebapp.config.json             # Azure Static Web App config
-├── tailwind.config.js                   # Tailwind CSS configuration
-├── tsconfig.json                        # TypeScript configuration
-└── README.md                            # This file
-```
+The application automatically deploys to Azure Static Web Apps when you push to the `main` branch via GitHub Actions.
+
+### Build Process
+
+1. GitHub Actions runs on push to `main`
+2. Installs dependencies with `npm ci`
+3. Builds static export with `npm run build`
+4. Deploys to Azure Static Web Apps
+5. Azure Easy Auth handles authentication
+
+### Monitoring
+
+Check deployment status:
+- **GitHub Actions**: https://github.com/behartless67-a11y/BattenSpaceFrontEnd/actions
+- **Azure Portal**: Your Static Web App resource > Deployment history
 
 ## Troubleshooting
 
-### Authentication Issues
-
-**Problem**: Users can't log in or get redirected incorrectly
+### Users Can't Log In
 
 **Solution**:
-- Verify redirect URIs in Azure App Registration match your environment
-- Check that the Client ID and Tenant ID are correct
-- Ensure API permissions are granted and admin consent is provided
+- Verify Easy Auth is configured in Azure Portal
+- Check that all three configuration values are set (Client ID, Secret, Tenant ID)
+- Ensure redirect URIs match in the app registration
+- Verify client secret hasn't expired (check email for rotation notices)
 
 ### Access Denied After Login
 
-**Problem**: Users see "Access Denied" message after successful login
+**Problem**: User sees "Access Denied" message
 
 **Solution**:
-- Verify the user is a member of one of the authorized groups
-- Check that `NEXT_PUBLIC_AUTHORIZED_GROUPS` contains the correct group IDs
-- Ensure the `GroupMember.Read.All` permission is granted
+- Verify the user is a member of `FBS_StaffAll` or `FBS_Community` groups in Azure AD
+- Check that "Emit groups as role claims" is enabled in app registration (already done by admin)
+- The user may need to log out and log back in after being added to a group
 
 ### Build Failures
 
 **Problem**: GitHub Actions workflow fails
 
 **Solution**:
-- Check that all required secrets are configured in GitHub
+- Check that `AZURE_STATIC_WEB_APPS_API_TOKEN` secret is configured in GitHub
 - Verify Node.js version compatibility (requires Node 18+)
 - Review build logs in GitHub Actions for specific errors
 
-### Custom Domain Not Working
+### /.auth/me Returns No Groups
 
-**Problem**: thebattenspace.org doesn't load the site
+**Problem**: Groups aren't appearing in user roles
 
 **Solution**:
-- Verify DNS records are configured correctly
-- Wait for DNS propagation (can take up to 48 hours)
-- Check SSL certificate status in Azure Portal
-- Ensure the domain is added and validated in Azure Static Web Apps
+- Verify "Emit groups as role claims" is enabled in Azure app registration (ID token)
+- Check that the user is actually a member of the groups in Azure AD
+- Try logging out and back in to refresh the token
+- Contact your admin to verify the token configuration
+
+## Managed Identity (MSI) - Optional
+
+Your admin mentioned setting up Managed Identity so the Static Web App can read the client secret directly from Key Vault without human intervention. If you want this:
+
+1. Contact your admin (Judy) to set up MSI
+2. Benefits:
+   - No need to manually retrieve secret from Key Vault
+   - Automatic secret rotation handling
+   - More secure (no human access to secrets)
 
 ## Support
 
 For issues or questions:
 - **Email**: bh4hb@virginia.edu
 - **GitHub Issues**: https://github.com/behartless67-a11y/BattenSpaceFrontEnd/issues
+- **Azure Admin**: Judy (for authentication/infrastructure issues)
+
+## Important Notes
+
+- The client secret in Key Vault is rotated every 6 months - you'll receive automated email notifications
+- Always use your **eservices account** (not SA account) to access Azure resources
+- Group membership changes may take a few minutes to propagate; users may need to log out and back in
 
 ## License
 

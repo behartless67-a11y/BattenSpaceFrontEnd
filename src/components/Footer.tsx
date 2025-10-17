@@ -12,10 +12,10 @@ export function Footer() {
           <div className="text-right">
             <p className="text-sm">
               <a
-                href="mailto:bh4hb@virginia.edu"
+                href="mailto:battensupport@virginia.edu"
                 className="hover:text-uva-orange transition-colors"
               >
-                Support: bh4hb@virginia.edu
+                Support: battensupport@virginia.edu
               </a>
             </p>
           </div>

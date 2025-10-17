@@ -197,16 +197,13 @@ export default function Home() {
           </div>
 
           {/* Tools Grid */}
-          {categories.map((category, idx) => {
-            const categoryTools = tools.filter((tool) => tool.category === category);
-            return (
-              <div key={category} className="mb-12">
-                <div className="mb-6">
-                  <h2 className="text-3xl font-bold text-uva-navy mb-2">{category}</h2>
-                  <div className="w-16 h-1 bg-uva-orange"></div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {categoryTools.map((tool) => (
+          <div className="mb-12">
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-uva-navy mb-2">Available Tools</h2>
+              <div className="w-16 h-1 bg-uva-orange"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {tools.map((tool) => (
                     <a
                       key={tool.id}
                       href={tool.url}
@@ -237,47 +234,11 @@ export default function Home() {
                       </div>
                       {/* Hover Effect Background */}
                       <div className="absolute inset-0 bg-gradient-to-br from-uva-orange/5 to-uva-navy/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Quick Links Section */}
-          <div className="mt-16 bg-white rounded-xl shadow-lg p-8 border-t-4 border-uva-orange">
-            <h2 className="text-2xl font-bold text-uva-navy mb-4">Quick Links</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <a
-                href="https://batten.virginia.edu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-uva-navy hover:text-uva-orange transition-colors font-semibold"
-              >
-                Batten School Website →
               </a>
-              <a
-                href="https://virginia.edu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-uva-navy hover:text-uva-orange transition-colors font-semibold"
-              >
-                UVA Website →
-              </a>
-              <a
-                href="mailto:bh4hb@virginia.edu"
-                className="text-uva-navy hover:text-uva-orange transition-colors font-semibold"
-              >
-                IT Support →
-              </a>
-              <a
-                href="#"
-                className="text-uva-navy hover:text-uva-orange transition-colors font-semibold"
-              >
-                Help Documentation →
-              </a>
+            ))}
             </div>
           </div>
+
         </main>
 
       <Footer />

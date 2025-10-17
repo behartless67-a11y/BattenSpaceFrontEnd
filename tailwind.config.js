@@ -12,6 +12,8 @@ module.exports = {
         'uva-orange': '#E57200',
         'uva-blue-light': '#2A3C5F',
         'uva-orange-light': '#F28C28',
+        'background': '#fafafa',
+        'foreground': '#232D4B',
       },
       fontFamily: {
         serif: ['var(--font-serif)', 'Georgia', 'serif'],

@@ -19,45 +19,20 @@ interface Tool {
 const tools: Tool[] = [
   {
     id: "1",
-    name: "Staff Directory",
-    description: "Search and view contact information for Batten School staff",
-    url: "https://thebattenspace.org/staff-directory",
-    icon: "users",
-    category: "Resources",
+    name: "Room Reservations",
+    description: "View and manage Batten School room reservations and availability",
+    url: "https://roomres.thebattenspace.org/",
+    icon: "chart",
+    category: "Facilities",
   },
   {
     id: "2",
-    name: "Batten Intranet",
-    description: "Access internal resources and information",
-    url: "https://thebattenspace.org/intranet",
-    icon: "file",
-    category: "Resources",
-  },
-  {
-    id: "3",
-    name: "Analytics Dashboard",
-    description: "View metrics and analytics for school operations",
-    url: "#",
-    icon: "chart",
-    category: "Analytics",
-  },
-  {
-    id: "4",
-    name: "Database Tools",
-    description: "Access database management and reporting tools",
-    url: "#",
+    name: "APP Explorer",
+    description: "Browse, search, and download Applied Policy Projects from the Batten School archives",
+    url: "https://appexplorer.thebattenspace.org/",
     icon: "database",
-    category: "Tools",
+    category: "Academic Resources",
   },
-  {
-    id: "5",
-    name: "Admin Portal",
-    description: "Administrative tools and settings",
-    url: "#",
-    icon: "wrench",
-    category: "Administration",
-  },
-  // Add more tools as needed
 ];
 
 function getIcon(iconName: string) {
@@ -115,9 +90,11 @@ export default function Home() {
         setUserInfo(data);
 
         if (data.clientPrincipal) {
-          // Check if user has any of the required groups in their roles
+          // TEMPORARY: Allow all authenticated users until groups are configured
+          // TODO: Re-enable group check once Judy configures group emission
           const userRoles = data.clientPrincipal.userRoles || [];
-          const authorized = REQUIRED_GROUPS.some(group => userRoles.includes(group));
+          // const authorized = REQUIRED_GROUPS.some(group => userRoles.includes(group));
+          const authorized = userRoles.includes('authenticated');
           setHasAccess(authorized);
         } else {
           // Not authenticated

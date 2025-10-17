@@ -14,7 +14,9 @@
       "Bash(git push:*)",
       "Bash(npm install)",
       "Bash(git pull:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(mv:*)",
+      "Read(//c/Users/Ben/Desktop/AI_Projects/RoomTool/RoomTool/**)"
     ],
     "deny": [],
     "ask": []

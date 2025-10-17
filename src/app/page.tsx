@@ -27,6 +27,14 @@ const tools: Tool[] = [
   },
   {
     id: "2",
+    name: "Room Analytics",
+    description: "View detailed room usage statistics, trends, and insights across all Batten School facilities",
+    url: "/room-analytics",
+    icon: "chart",
+    category: "Facilities",
+  },
+  {
+    id: "3",
     name: "APP Explorer",
     description: "Browse, search, and download Applied Policy Projects from the Batten School archives",
     url: "https://appexplorer.thebattenspace.org/",
@@ -59,6 +67,39 @@ export default function Home() {
   const [hasAccess, setHasAccess] = useState(false);
 
   const categories = Array.from(new Set(tools.map((tool) => tool.category)));
+
+  // Extract first and last name from user info
+  const getUserName = () => {
+    if (!userInfo?.clientPrincipal) return null;
+
+    // Try to get name from claims first
+    const claims = userInfo.clientPrincipal.claims;
+    if (claims) {
+      const givenName = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname')?.val;
+      const surname = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname')?.val;
+
+      if (givenName && surname) {
+        return `${givenName} ${surname}`;
+      }
+
+      // Try alternative claim types
+      const name = claims.find(c => c.typ === 'name' || c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name')?.val;
+      if (name) return name;
+    }
+
+    // Fall back to userDetails
+    const userDetails = userInfo.clientPrincipal.userDetails;
+    // If it's an email, extract the name part before @
+    if (userDetails.includes('@')) {
+      const namePart = userDetails.split('@')[0];
+      // Convert something like "john.doe" to "John Doe"
+      return namePart.split('.').map(part =>
+        part.charAt(0).toUpperCase() + part.slice(1)
+      ).join(' ');
+    }
+
+    return userDetails;
+  };
 
   // Required groups - update these if needed
   const REQUIRED_GROUPS = ["FBS_StaffAll", "FBS_Community"];
@@ -186,50 +227,48 @@ export default function Home() {
         <main className="flex-1 max-w-7xl w-full mx-auto px-8 py-12">
           {/* Hero Section */}
           <div className="text-center mb-16">
-            <h1 className="text-6xl font-bold mb-4 text-uva-navy animate-fade-in-up">
-              Welcome to The Batten Space
+            <h1 className="text-5xl font-bold mb-3 text-uva-navy animate-fade-in-up">
+              Welcome{getUserName() ? `, ${getUserName()}` : ''} to The Batten Space
             </h1>
-            <div className="w-24 h-1 bg-uva-orange mx-auto mb-6 animate-fade-in-up animation-delay-200"></div>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto animate-fade-in-up animation-delay-400">
+            <div className="w-24 h-1 bg-uva-orange mx-auto mb-4 animate-fade-in-up animation-delay-200"></div>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto animate-fade-in-up animation-delay-400">
               Your central hub for digital tools and resources at the Frank Batten School of
               Leadership and Public Policy
             </p>
           </div>
 
           {/* Tools Grid */}
-          <div className="mb-12">
+          <div className="mb-6">
             <div className="mb-6">
-              <h2 className="text-3xl font-bold text-uva-navy mb-2">Available Tools</h2>
+              <h2 className="text-2xl font-bold text-uva-navy mb-2">Available Tools</h2>
               <div className="w-16 h-1 bg-uva-orange"></div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
               {tools.map((tool) => (
                     <a
                       key={tool.id}
                       href={tool.url}
-                      target="_blank"
+                      target={tool.url.startsWith('/') ? '_self' : '_blank'}
                       rel="noopener noreferrer"
-                      className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-uva-orange"
+                      className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-uva-orange h-full"
                     >
-                      <div className="p-6">
-                        <div className="flex items-start gap-4 mb-4">
-                          <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-uva-navy group-hover:bg-uva-orange transition-colors duration-300 flex items-center justify-center text-white">
+                      <div className="p-8 h-full flex flex-col">
+                        <div className="flex flex-col items-center text-center mb-6">
+                          <div className="w-20 h-20 rounded-lg bg-uva-navy group-hover:bg-uva-orange transition-colors duration-300 flex items-center justify-center text-white mb-4">
                             {getIcon(tool.icon)}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-xl font-bold text-uva-navy mb-2 group-hover:text-uva-orange transition-colors">
-                              {tool.name}
-                            </h3>
-                            <p className="text-gray-600 text-sm line-clamp-2">
-                              {tool.description}
-                            </p>
-                          </div>
+                          <h3 className="text-2xl font-bold text-uva-navy mb-3 group-hover:text-uva-orange transition-colors">
+                            {tool.name}
+                          </h3>
+                          <p className="text-gray-600 text-base leading-relaxed">
+                            {tool.description}
+                          </p>
                         </div>
-                        <div className="flex items-center text-uva-orange font-semibold text-sm">
+                        <div className="flex items-center justify-center text-uva-orange font-semibold text-base mt-auto">
                           <span className="group-hover:translate-x-1 transition-transform">
                             Open Tool
                           </span>
-                          <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                          <ExternalLink className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </div>
                       {/* Hover Effect Background */}

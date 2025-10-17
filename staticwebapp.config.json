@@ -1,1 +1,6 @@
-{"routes":[{"route":"/*","allowedRoles":["authenticated"]}],"responseOverrides":{"401":{"redirect":"/.auth/login/aad","statusCode":302}},"navigationFallback":{"rewrite":"/index.html","exclude":["*.{css,js,png,jpg,gif,svg,ico}","/_next/*","/api/*"]}}
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["*.{css,js,png,jpg,gif,svg,ico}", "/_next/*", "/api/*"]
+  }
+}

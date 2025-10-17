@@ -16,7 +16,8 @@
       "Bash(git pull:*)",
       "Bash(npm run dev:*)",
       "Bash(mv:*)",
-      "Read(//c/Users/Ben/Desktop/AI_Projects/RoomTool/RoomTool/**)"
+      "Read(//c/Users/Ben/Desktop/AI_Projects/RoomTool/RoomTool/**)",
+      "Bash(That 's a total of 22.4 hours during this period.\"\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

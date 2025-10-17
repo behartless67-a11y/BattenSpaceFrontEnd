@@ -128,6 +128,7 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [localRoomFilter, setLocalRoomFilter] = useState<string>('top5');
 
   useEffect(() => {
     fetchStats();
@@ -243,16 +244,39 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
   }
 
   // Sort rooms by average hours (highest first)
-  const topRooms = [...stats.rooms]
+  const allRoomsSorted = [...stats.rooms]
     .filter(room => !room.error)
-    .sort((a, b) => b.averageHoursPerDay - a.averageHoursPerDay)
-    .slice(0, 5);
+    .sort((a, b) => b.averageHoursPerDay - a.averageHoursPerDay);
+
+  const topRooms = allRoomsSorted.slice(0, 5);
+
+  // Get the selected room for display
+  const displayRooms = localRoomFilter === 'top5'
+    ? topRooms
+    : allRoomsSorted.filter(room => room.id === localRoomFilter);
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-100">
-      <div className="flex items-center gap-3 mb-6">
-        <BarChart className="w-6 h-6 text-uva-orange" />
-        <h2 className="text-2xl font-bold text-uva-navy">Room Usage Statistics</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <BarChart className="w-6 h-6 text-uva-orange" />
+          <h2 className="text-2xl font-bold text-uva-navy">Room Usage Statistics</h2>
+        </div>
+
+        {/* Local Room Filter */}
+        <select
+          value={localRoomFilter}
+          onChange={(e) => setLocalRoomFilter(e.target.value)}
+          className="px-4 py-2 border-2 border-gray-200 rounded-lg text-sm font-semibold text-uva-navy focus:outline-none focus:border-uva-orange"
+        >
+          <option value="top5">Top 5 Rooms</option>
+          <option disabled>──────────</option>
+          {ROOMS.map((room) => (
+            <option key={room.id} value={room.id}>
+              {room.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Summary Cards */}
@@ -287,34 +311,77 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
         </div>
       </div>
 
-      {/* Top Rooms Table */}
+      {/* Rooms Display */}
       <div>
-        <h3 className="text-lg font-bold text-uva-navy mb-3">Most Used Rooms</h3>
+        <h3 className="text-lg font-bold text-uva-navy mb-3">
+          {localRoomFilter === 'top5' ? 'Most Used Rooms' : 'Room Details'}
+        </h3>
         <p className="text-sm text-gray-600 mb-3">
           Average hours per day over the last {selectedTimeRange === 'day' ? 'day' : selectedTimeRange === 'week' ? '7 days' : '30 days'}
         </p>
         <div className="space-y-2">
-          {topRooms.map((room, index) => (
+          {displayRooms.map((room, index) => (
             <div
               key={room.id}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              className={`p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors ${
+                localRoomFilter !== 'top5' ? 'border-2 border-uva-orange' : ''
+              }`}
             >
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-uva-orange text-white font-bold text-sm">
-                  {index + 1}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  {localRoomFilter === 'top5' && (
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-uva-orange text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-semibold text-uva-navy text-lg">{room.name}</p>
+                    <p className="text-sm text-gray-500">{room.building}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-uva-navy">{room.name}</p>
-                  <p className="text-xs text-gray-500">{room.building}</p>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-uva-orange">{room.averageHoursPerDay}h</p>
+                  <p className="text-xs text-gray-500">per day</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-uva-orange">{room.averageHoursPerDay}h</p>
-                <p className="text-xs text-gray-500">{room.todayEvents} today</p>
-              </div>
+
+              {/* Enhanced details when viewing single room */}
+              {localRoomFilter !== 'top5' && (
+                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200">
+                  <div className="text-center p-3 bg-white rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Today's Events</p>
+                    <p className="text-2xl font-bold text-uva-navy">{room.todayEvents}</p>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Total Hours ({selectedTimeRange})</p>
+                    <p className="text-2xl font-bold text-uva-navy">
+                      {(room.averageHoursPerDay * getDaysForRange()).toFixed(1)}h
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Compact view for top 5 */}
+              {localRoomFilter === 'top5' && (
+                <div className="flex items-center justify-between text-xs text-gray-600">
+                  <span>{room.todayEvents} events today</span>
+                  <span>{(room.averageHoursPerDay * getDaysForRange()).toFixed(1)}h total</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
+
+        {localRoomFilter !== 'top5' && displayRooms.length > 0 && (
+          <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>What does this mean?</strong> This room was used an average of{' '}
+              <strong>{displayRooms[0].averageHoursPerDay} hours per day</strong> over the{' '}
+              {selectedTimeRange === 'day' ? 'last day' : selectedTimeRange === 'week' ? 'last 7 days' : 'last 30 days'}.
+              {' '}That's a total of <strong>{(displayRooms[0].averageHoursPerDay * getDaysForRange()).toFixed(1)} hours</strong> during this period.
+            </p>
+          </div>
+        )}
       </div>
 
       <p className="text-xs text-gray-400 mt-4 text-center">

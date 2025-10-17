@@ -39,7 +39,56 @@ A dedicated standalone page for facilities management to view detailed room usag
 - Garrett Hall: Conference Room A L014, Great Hall 100, Seminar Room L039, Student Lounge 206
 - Pavilion X: Upper Garden, Basement Room 1, Basement Room 2, Basement Exhibit
 
-### 2. Global Filter Controls
+### 2. Capacity Analysis
+Comprehensive space utilization analysis with recommendations for optimal room scheduling.
+
+**Location:** `/room-analytics` (row 4)
+
+**Features:**
+- **Utilization Rates:** Calculates percentage of available hours used (based on 12-hour day, 8am-8pm)
+- **Smart Recommendations:** Automatically classifies rooms as underutilized (<30%), optimal (30-80%), or high-demand (>80%)
+- **Room-by-Room Breakdown:** Detailed metrics for each room with color-coded progress bars
+- **Summary Metrics:** Average utilization, total booked hours, rooms needing attention
+- **Peak Day Analysis:** Shows highest utilization day for each room
+- **Filter Integration:** Respects global time range and room selections
+
+**Technical Implementation:**
+- Component: [CapacityAnalysis.tsx](src/components/CapacityAnalysis.tsx)
+- Fetches ICS calendar data from Azure Function
+- Calculates metrics: utilization rate, total hours, available hours, peak utilization
+- Auto-refreshes every 15 minutes
+- Color coding: Yellow (underutilized), Green (optimal), Red (high-demand)
+
+### 3. Export Reports
+Download comprehensive analytics reports in multiple formats for administrative review and analysis.
+
+**Location:** `/room-analytics` (row 5)
+
+**Features:**
+- **CSV Export:** Detailed data for Excel/Sheets analysis
+  - Room usage statistics
+  - Booking details & timestamps
+  - Capacity metrics
+  - Daily utilization rates
+- **PDF Export:** Professional formatted report with visualizations
+  - Executive summary
+  - Usage trend charts
+  - Peak hours heatmap
+  - Capacity analysis
+- **JSON Export:** Raw data for custom integrations
+  - Complete event data
+  - ICS calendar format
+  - Metadata & timestamps
+  - API-ready structure
+
+**Technical Implementation:**
+- Component: [ExportReports.tsx](src/components/ExportReports.tsx)
+- Dynamic labels reflect current filter selections
+- Success notifications on export completion
+- Simulated export with 1.5s delay (production would call actual API)
+- Respects global filter selections for scoped exports
+
+### 4. Global Filter Controls
 A centralized filter system at the top of the Room Analytics page that controls all analytics components.
 
 **Location:** `/room-analytics` (top of page)
@@ -56,6 +105,8 @@ A centralized filter system at the top of the Room Analytics page that controls 
 - **Usage Trends:** Displays 1/14/30 days of trend data based on selection
 - **Peak Hours Heatmap:** Shows heatmap for selected room or all rooms
 - **Current Status:** Filters to show selected room or all rooms
+- **Capacity Analysis:** Calculates utilization for selected time range and room
+- **Export Reports:** Exports data matching selected filters
 
 **Technical Implementation:**
 - State managed in [room-analytics/page.tsx](src/app/room-analytics/page.tsx:28-29)
@@ -244,6 +295,41 @@ Based on the placeholder cards in Room Analytics page:
 ---
 
 ## Git Commits
+
+### Commit 3: Capacity Analysis and Export Reports
+**Commit Hash:** `e245318`
+**Date:** October 17, 2025
+
+**Commit Message:**
+```
+Add Capacity Analysis and Export Reports to Room Analytics
+
+New features:
+- Add CapacityAnalysis component showing room utilization metrics
+- Add ExportReports component with CSV/PDF/JSON download options
+- Replace "Coming Soon" placeholders with fully functional components
+
+Capacity Analysis features:
+- Calculate utilization rates based on 12-hour available window (8am-8pm)
+- Show average utilization across all rooms
+- Highlight underutilized (<30%), optimal (30-80%), and high-demand (>80%) rooms
+- Display total booked hours and peak day utilization per room
+- Color-coded progress bars and recommendations
+- Respects global filter selections for time range and room
+
+Export Reports features:
+- CSV export for spreadsheet analysis (usage stats, booking details, capacity metrics)
+- PDF export with charts and visualizations (executive summary, trends, heatmap)
+- JSON export for API integrations (raw event data, ICS format, metadata)
+- Dynamic labels reflecting current filter selections
+- Success notifications when export completes
+- Detailed descriptions of included data for each format
+```
+
+**Files Changed:**
+- [src/components/CapacityAnalysis.tsx](src/components/CapacityAnalysis.tsx) - New component for capacity analysis
+- [src/components/ExportReports.tsx](src/components/ExportReports.tsx) - New component for report exports
+- [src/app/room-analytics/page.tsx](src/app/room-analytics/page.tsx) - Added new components to layout
 
 ### Commit 2: Global Filter Controls
 **Commit Hash:** `9ae1127`

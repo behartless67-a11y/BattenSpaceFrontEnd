@@ -108,6 +108,7 @@ export function PeakHoursHeatmap({ selectedRoom }: PeakHoursHeatmapProps) {
   const [heatmapData, setHeatmapData] = useState<HeatmapData>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [localRoomFilter, setLocalRoomFilter] = useState<string>('all');
 
   useEffect(() => {
     fetchHeatmapData();
@@ -172,10 +173,10 @@ export function PeakHoursHeatmap({ selectedRoom }: PeakHoursHeatmapProps) {
     );
   }
 
-  // Aggregate data across all rooms or show selected room
+  // Aggregate data across all rooms or show selected room (use local filter)
   const displayData: HeatmapData[string] = {};
 
-  if (selectedRoom === 'all') {
+  if (localRoomFilter === 'all') {
     // Sum up all rooms
     for (let day = 0; day < 7; day++) {
       displayData[day] = {};
@@ -188,7 +189,7 @@ export function PeakHoursHeatmap({ selectedRoom }: PeakHoursHeatmapProps) {
     }
   } else {
     // Show specific room
-    Object.assign(displayData, heatmapData[selectedRoom] || {});
+    Object.assign(displayData, heatmapData[localRoomFilter] || {});
   }
 
   // Find max value for color scaling
@@ -199,15 +200,49 @@ export function PeakHoursHeatmap({ selectedRoom }: PeakHoursHeatmapProps) {
     1
   );
 
+  // Get the full room name for display
+  const getFullRoomName = (roomId: string) => {
+    const fullRooms = [
+      { id: 'confa', name: 'Conference Room A L014' },
+      { id: 'greathall', name: 'Great Hall 100' },
+      { id: 'seminar', name: 'Seminar Room L039' },
+      { id: 'studentlounge206', name: 'Student Lounge 206' },
+      { id: 'pavx-upper', name: 'Pavilion X Upper Garden' },
+      { id: 'pavx-b1', name: 'Pavilion X Basement Room 1' },
+      { id: 'pavx-b2', name: 'Pavilion X Basement Room 2' },
+      { id: 'pavx-exhibit', name: 'Pavilion X Basement Exhibit' },
+    ];
+    return fullRooms.find(r => r.id === roomId)?.name || roomId;
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-100">
-      <div className="flex items-center gap-3 mb-6">
-        <Activity className="w-6 h-6 text-uva-orange" />
-        <h2 className="text-2xl font-bold text-uva-navy">Peak Hours Heatmap</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Activity className="w-6 h-6 text-uva-orange" />
+          <h2 className="text-2xl font-bold text-uva-navy">Peak Hours Heatmap</h2>
+        </div>
+
+        {/* Local Room Filter */}
+        <select
+          value={localRoomFilter}
+          onChange={(e) => setLocalRoomFilter(e.target.value)}
+          className="px-4 py-2 border-2 border-gray-200 rounded-lg text-sm font-semibold text-uva-navy focus:outline-none focus:border-uva-orange"
+        >
+          <option value="all">All Rooms Combined</option>
+          <option disabled>──────────</option>
+          {ROOMS.map((room) => (
+            <option key={room.id} value={room.id}>
+              {getFullRoomName(room.id)}
+            </option>
+          ))}
+        </select>
       </div>
 
       <p className="text-sm text-gray-600 mb-4">
-        Shows booking frequency by day of week and time of day
+        {localRoomFilter === 'all'
+          ? 'Shows booking frequency across all rooms by day of week and time of day'
+          : `Shows booking frequency for ${getFullRoomName(localRoomFilter)}`}
       </p>
 
       {/* Heatmap Grid */}

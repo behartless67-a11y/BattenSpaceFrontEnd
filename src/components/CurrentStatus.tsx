@@ -272,73 +272,79 @@ export function CurrentStatus({ selectedRoom }: CurrentStatusProps) {
         </div>
       </div>
 
-      {/* Room List */}
-      <div className="space-y-3">
-        <h3 className="text-lg font-bold text-uva-navy mb-3">All Rooms</h3>
-
+      {/* Room Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {roomStatuses.map((room) => (
           <div
             key={room.id}
-            className={`p-4 rounded-lg border-2 transition-colors ${
+            className={`p-4 rounded-lg border-2 transition-all hover:shadow-lg ${
               room.error
                 ? 'bg-gray-50 border-gray-200'
                 : room.isOccupied
-                ? 'bg-red-50 border-red-200'
-                : 'bg-green-50 border-green-200'
+                ? 'bg-red-50 border-red-200 hover:border-red-300'
+                : 'bg-green-50 border-green-200 hover:border-green-300'
             }`}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  {room.error ? (
-                    <AlertCircle className="w-5 h-5 text-gray-400" />
-                  ) : room.isOccupied ? (
-                    <XCircle className="w-5 h-5 text-red-600" />
-                  ) : (
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                  )}
-                  <h4 className="font-bold text-uva-navy">{room.name}</h4>
-                </div>
-                <p className="text-sm text-gray-600 mb-2">{room.building}</p>
-
+            {/* Room Header */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-2">
                 {room.error ? (
-                  <p className="text-sm text-gray-500">Status unavailable</p>
-                ) : room.isOccupied && room.currentEvent ? (
-                  <div className="space-y-1">
-                    <p className="text-sm font-semibold text-red-700">
-                      Occupied: {room.currentEvent.summary}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Until {formatTime(room.currentEvent.endTime)} ({getTimeUntil(room.currentEvent.endTime)})
-                    </p>
-                  </div>
+                  <AlertCircle className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                ) : room.isOccupied ? (
+                  <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
                 ) : (
-                  <div className="space-y-1">
-                    <p className="text-sm font-semibold text-green-700">Available Now</p>
-                    {room.nextEvent ? (
-                      <p className="text-sm text-gray-600">
-                        Next booking: {formatTime(room.nextEvent.startTime)} ({getTimeUntil(room.nextEvent.startTime)})
-                      </p>
-                    ) : (
-                      <p className="text-sm text-gray-600">No upcoming bookings today</p>
-                    )}
-                  </div>
+                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
                 )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-sm text-uva-navy truncate">{room.name.split(' ').slice(0, 3).join(' ')}</h4>
+                </div>
               </div>
+              {!room.error && (
+                <span
+                  className={`px-2 py-1 rounded text-xs font-bold flex-shrink-0 ${
+                    room.isOccupied
+                      ? 'bg-red-600 text-white'
+                      : 'bg-green-600 text-white'
+                  }`}
+                >
+                  {room.isOccupied ? 'BUSY' : 'FREE'}
+                </span>
+              )}
+            </div>
 
-              <div className="text-right">
-                {!room.error && (
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                      room.isOccupied
-                        ? 'bg-red-600 text-white'
-                        : 'bg-green-600 text-white'
-                    }`}
-                  >
-                    {room.isOccupied ? 'BUSY' : 'FREE'}
-                  </span>
-                )}
-              </div>
+            {/* Room Status Details */}
+            <div className="space-y-2">
+              {room.error ? (
+                <p className="text-xs text-gray-500">Status unavailable</p>
+              ) : room.isOccupied && room.currentEvent ? (
+                <>
+                  <p className="text-xs font-semibold text-red-700 truncate">
+                    {room.currentEvent.summary}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Until {formatTime(room.currentEvent.endTime)}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    ({getTimeUntil(room.currentEvent.endTime)})
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs font-semibold text-green-700">Available Now</p>
+                  {room.nextEvent ? (
+                    <>
+                      <p className="text-xs text-gray-600">
+                        Next: {formatTime(room.nextEvent.startTime)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        ({getTimeUntil(room.nextEvent.startTime)})
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-gray-600">No upcoming bookings</p>
+                  )}
+                </>
+              )}
             </div>
           </div>
         ))}

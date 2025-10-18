@@ -91,7 +91,7 @@ export default function RoomAnalytics() {
 
       <Header user={userInfo?.clientPrincipal} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-8 py-6">
+      <main className="flex-1 max-w-[1800px] w-full mx-auto px-6 py-6">
         {/* Back Button */}
         <a
           href="/"
@@ -144,30 +144,30 @@ export default function RoomAnalytics() {
           </div>
         </div>
 
-        {/* Row 1: Current Status (full width) */}
-        <div className="mb-8">
-          <CurrentStatus selectedRoom={selectedRoom} />
-        </div>
-
-        {/* Row 2: Room Stats and Usage Trends side-by-side */}
+        {/* Row 1: Room Stats and Usage Trends side-by-side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <RoomStats selectedTimeRange={selectedTimeRange} selectedRoom={selectedRoom} />
           <UsageTrends selectedTimeRange={selectedTimeRange} selectedRoom={selectedRoom} />
         </div>
 
-        {/* Row 3: Peak Hours Heatmap (full width) */}
+        {/* Row 2: Peak Hours Heatmap (full width) */}
         <div className="mb-8">
           <PeakHoursHeatmap selectedRoom={selectedRoom} />
         </div>
 
-        {/* Row 4: Capacity Analysis (full width) */}
+        {/* Row 3: Capacity Analysis (full width) */}
         <div className="mb-8">
           <CapacityAnalysis selectedTimeRange={selectedTimeRange} selectedRoom={selectedRoom} />
         </div>
 
-        {/* Row 5: Export Reports (full width) */}
+        {/* Row 4: Export Reports (full width) */}
         <div className="mb-8">
           <ExportReports selectedTimeRange={selectedTimeRange} selectedRoom={selectedRoom} />
+        </div>
+
+        {/* Row 5: Current Status (full width) - Moved to bottom */}
+        <div className="mb-8">
+          <CurrentStatus selectedRoom={selectedRoom} />
         </div>
       </main>
 

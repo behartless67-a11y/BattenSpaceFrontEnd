@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { RoomAvailabilityWidget } from "@/components/RoomAvailabilityWidget";
+import { UpcomingEventsWidget } from "@/components/UpcomingEventsWidget";
 import { ExternalLink, Wrench, Users, FileText, BarChart, Database, Calendar, Newspaper } from "lucide-react";
 import { UserInfo } from "@/types/auth";
 import { lookupStaffMember } from "@/lib/staffLookup";
@@ -89,6 +91,14 @@ export default function Home() {
   const [isNewsVisible, setIsNewsVisible] = useState(true);
 
   const categories = Array.from(new Set(tools.map((tool) => tool.category)));
+
+  // Get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   // Extract user's full name and first name from claims or staff directory
   const getUserName = () => {
@@ -333,10 +343,10 @@ export default function Home() {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <h1 className="text-5xl font-bold mb-3 text-uva-navy animate-fade-in-up">
-              Welcome{(() => {
+              {getTimeBasedGreeting()}{(() => {
                 const userName = getUserName();
                 return userName ? `, ${userName.first}` : '';
-              })()} to The Batten Space
+              })()}
             </h1>
             <div className="w-24 h-1 bg-uva-orange mx-auto mb-4 animate-fade-in-up animation-delay-200"></div>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto animate-fade-in-up animation-delay-400">
@@ -372,6 +382,14 @@ export default function Home() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Quick Info Widgets */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 max-w-6xl mx-auto">
+            <RoomAvailabilityWidget />
+            <div className="lg:col-span-2">
+              <UpcomingEventsWidget />
+            </div>
           </div>
 
           {/* Tools Grid */}

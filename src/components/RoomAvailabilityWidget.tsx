@@ -1,0 +1,83 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Calendar, CheckCircle2, XCircle } from "lucide-react";
+
+interface RoomStatus {
+  name: string;
+  available: boolean;
+  nextEvent?: string;
+}
+
+export function RoomAvailabilityWidget() {
+  const [rooms, setRooms] = useState<RoomStatus[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [availableCount, setAvailableCount] = useState(0);
+
+  useEffect(() => {
+    // Mock data for now - this can be connected to actual room reservation API later
+    const mockRooms: RoomStatus[] = [
+      { name: "Great Hall 100", available: true },
+      { name: "Conference Room A", available: false, nextEvent: "2:00 PM" },
+      { name: "Seminar Room", available: true },
+      { name: "Student Lounge", available: true },
+      { name: "Pavilion X Upper Garden", available: false, nextEvent: "3:30 PM" },
+    ];
+
+    setRooms(mockRooms);
+    setAvailableCount(mockRooms.filter(r => r.available).length);
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+        <div className="animate-pulse flex items-center gap-2">
+          <div className="h-4 bg-gray-300 rounded w-24"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+      <div className="flex items-center gap-3 mb-3">
+        <Calendar className="w-5 h-5 text-uva-orange" />
+        <h3 className="font-semibold text-uva-navy">Room Availability</h3>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-3xl font-bold text-uva-navy">{availableCount}/{rooms.length}</div>
+        <div className="text-sm text-gray-600">Rooms available now</div>
+      </div>
+
+      <div className="space-y-2">
+        {rooms.map((room, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between text-sm py-1 border-t border-gray-100 first:border-t-0"
+          >
+            <span className="text-gray-700 truncate flex-1">{room.name}</span>
+            {room.available ? (
+              <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+            ) : (
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-xs text-gray-500">{room.nextEvent}</span>
+                <XCircle className="w-4 h-4 text-red-500" />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <a
+        href="https://roomres.thebattenspace.org/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-4 block text-center text-sm text-uva-orange hover:text-uva-orange-light font-semibold transition-colors"
+      >
+        View Full Schedule →
+      </a>
+    </div>
+  );
+}

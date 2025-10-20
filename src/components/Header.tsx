@@ -127,7 +127,9 @@ export function Header({ user }: HeaderProps) {
     return userDetails || 'User';
   };
 
-  const displayName = getUserName();
+  const fullName = getUserName();
+  // Extract first name from full name (e.g., "Ben Hartless" -> "Ben")
+  const firstName = fullName ? fullName.split(' ')[0] : null;
 
   return (
     <header className="bg-uva-navy text-white shadow-lg">
@@ -168,9 +170,9 @@ export function Header({ user }: HeaderProps) {
           <div className="flex items-center gap-4">
             {user && (
               <div className="text-right">
-                <p className="text-sm font-semibold">{displayName}</p>
+                <p className="text-sm font-semibold">Welcome, {firstName}</p>
                 <p className="text-xs text-gray-300">
-                  {user.userRoles.filter(role => role !== 'anonymous' && role !== 'authenticated').join(', ') || 'Staff'}
+                  {fullName}
                 </p>
               </div>
             )}

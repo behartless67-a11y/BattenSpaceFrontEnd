@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ExternalLink, Wrench, Users, FileText, BarChart, Database } from "lucide-react";
+import { ExternalLink, Wrench, Users, FileText, BarChart, Database, Calendar } from "lucide-react";
 import { UserInfo } from "@/types/auth";
 
 interface Tool {
@@ -11,7 +11,7 @@ interface Tool {
   name: string;
   description: string;
   url: string;
-  icon: "wrench" | "users" | "file" | "chart" | "database" | "link";
+  icon: "wrench" | "users" | "file" | "chart" | "database" | "calendar" | "link";
   category: string;
 }
 
@@ -22,7 +22,7 @@ const tools: Tool[] = [
     name: "Room Reservations",
     description: "View and manage Batten School room reservations and availability",
     url: "https://roomres.thebattenspace.org/",
-    icon: "chart",
+    icon: "calendar",
     category: "Facilities",
   },
   {
@@ -56,6 +56,8 @@ function getIcon(iconName: string) {
       return <BarChart className={iconClass} />;
     case "database":
       return <Database className={iconClass} />;
+    case "calendar":
+      return <Calendar className={iconClass} />;
     default:
       return <ExternalLink className={iconClass} />;
   }

@@ -365,47 +365,53 @@ export function UsageTrends({ selectedTimeRange, selectedRoom }: UsageTrendsProp
         <h2 className="text-2xl font-bold text-uva-navy">Usage Trends ({getDaysLabel()})</h2>
       </div>
 
-      {/* Simple Bar Chart */}
-      <div className="mb-8">
-        <div className="space-y-6">
+      {/* Compact Horizontal Bar Chart */}
+      <div className="mb-6">
+        <div className="space-y-4">
           {trends.map((trend) => {
             const totalHours = trend.dailyUsage.reduce((sum, d) => sum + d.hours, 0);
             const avgHours = totalHours / trend.dailyUsage.length;
 
             return (
-              <div key={trend.roomId}>
+              <div key={trend.roomId} className="border-b border-gray-200 pb-3">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-bold text-uva-navy">{trend.roomName}</h3>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-xs text-gray-600">
                     Avg: {avgHours.toFixed(1)}h/day
                   </span>
                 </div>
 
-                <div className="relative h-12 bg-gray-100 rounded-lg overflow-hidden">
-                  <div className="absolute inset-0 flex items-end gap-0.5 px-1 py-1">
-                    {trend.dailyUsage.map((day, idx) => {
-                      const heightPercent = (day.hours / maxHours) * 100;
-                      return (
-                        <div
-                          key={idx}
-                          className="flex-1 relative group"
-                          title={`${day.date}: ${day.hours}h`}
-                        >
+                <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                  {trend.dailyUsage.map((day, idx) => {
+                    const widthPercent = (day.hours / maxHours) * 100;
+                    const displayDate = new Date(day.date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric'
+                    });
+
+                    return (
+                      <div key={idx} className="flex items-center gap-2 text-xs">
+                        <span className="text-gray-600 w-12 flex-shrink-0">
+                          {displayDate}:
+                        </span>
+                        <div className="flex-1 bg-gray-100 rounded h-4 overflow-hidden min-w-0">
                           <div
-                            className="w-full rounded-t transition-all duration-200 hover:opacity-80"
+                            className="h-full rounded flex items-center justify-end px-1.5"
                             style={{
-                              height: `${heightPercent}%`,
+                              width: `${Math.max(widthPercent, day.hours > 0 ? 8 : 0)}%`,
                               backgroundColor: trend.color,
-                              minHeight: day.hours > 0 ? '2px' : '0',
                             }}
-                          ></div>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
-                            {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: {day.hours}h
+                          >
+                            {day.hours > 0 && (
+                              <span className="text-xs font-medium text-white whitespace-nowrap">
+                                {day.hours}h
+                              </span>
+                            )}
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

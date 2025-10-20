@@ -41,57 +41,243 @@ interface CalendarEvent {
   startTime: Date;
   endTime: Date;
   duration: number;
+  rrule?: string;
+  uid?: string;
+  _isRecurringParent?: boolean;
+  _isRecurringInstance?: boolean;
+}
+
+function expandRecurringEvent(parentEvent: CalendarEvent): CalendarEvent[] {
+  const instances: CalendarEvent[] = [];
+  const rrule = parentEvent.rrule;
+
+  if (!rrule) return instances;
+
+  // Parse basic RRULE format: FREQ=WEEKLY;UNTIL=20251216T204500Z;INTERVAL=1;BYDAY=TU;WKST=SU
+  const rruleParams: Record<string, string> = {};
+  rrule.split(';').forEach(param => {
+    const [key, value] = param.split('=');
+    if (key && value) {
+      rruleParams[key] = value;
+    }
+  });
+
+  if (rruleParams.FREQ === 'WEEKLY' && rruleParams.BYDAY) {
+    const startDate = new Date(parentEvent.startTime);
+    const endDate = new Date(parentEvent.endTime);
+    const duration = endDate.getTime() - startDate.getTime(); // Duration in milliseconds
+
+    // Parse UNTIL date if present
+    let untilDate: Date | null = null;
+    if (rruleParams.UNTIL) {
+      // Parse UNTIL format: 20251216T204500Z
+      const untilStr = rruleParams.UNTIL;
+      const parsedUntil = parseDateString(untilStr);
+      if (parsedUntil) {
+        untilDate = parsedUntil;
+      }
+    }
+
+    // Map day abbreviations to day numbers (0 = Sunday)
+    const dayMap: Record<string, number> = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+    const targetDay = dayMap[rruleParams.BYDAY];
+
+    if (targetDay !== undefined) {
+      // Only expand up to the UNTIL date, or a reasonable max of 1 year from start
+      const oneYearFromStart = new Date(startDate.getTime() + (365 * 24 * 60 * 60 * 1000));
+      const maxDate = untilDate || oneYearFromStart;
+
+      let currentDate = new Date(startDate);
+
+      // Find the first occurrence on the target day
+      while (currentDate.getDay() !== targetDay && currentDate < maxDate) {
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      // Generate weekly instances
+      while (currentDate <= maxDate) {
+        const instanceStart = new Date(currentDate);
+        const instanceEnd = new Date(instanceStart.getTime() + duration);
+
+        // Create a new event instance
+        const instance: CalendarEvent = {
+          summary: parentEvent.summary || 'Untitled',
+          startTime: instanceStart,
+          endTime: instanceEnd,
+          duration: (instanceEnd.getTime() - instanceStart.getTime()) / (1000 * 60),
+          uid: `${parentEvent.uid || 'unknown'}_${instanceStart.getTime()}`,
+          _isRecurringInstance: true,
+        };
+
+        instances.push(instance);
+
+        // Move to next week
+        currentDate.setDate(currentDate.getDate() + 7);
+      }
+    }
+  }
+
+  return instances;
 }
 
 function parseICSContent(icsContent: string): CalendarEvent[] {
   const events: CalendarEvent[] = [];
-  const lines = icsContent.split('\n');
+  const lines = icsContent.split(/\r?\n/); // Handle both \n and \r\n line endings
+  const seenUIDs = new Set<string>(); // Track UIDs to detect duplicates
 
   let currentEvent: Partial<CalendarEvent> = {};
   let inEvent = false;
+  let eventCount = 0;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    let line = lines[i] ? lines[i].trim() : '';
+
+    // Handle line continuation (lines starting with space or tab)
+    while (i + 1 < lines.length && lines[i + 1] && (lines[i + 1].startsWith(' ') || lines[i + 1].startsWith('\t'))) {
+      i++;
+      line += lines[i] ? lines[i].substring(1) : '';
+    }
 
     if (line === 'BEGIN:VEVENT') {
       inEvent = true;
       currentEvent = {};
+      eventCount++;
     } else if (line === 'END:VEVENT' && inEvent) {
       if (currentEvent.startTime && currentEvent.endTime) {
         const duration = (currentEvent.endTime.getTime() - currentEvent.startTime.getTime()) / (1000 * 60);
-        events.push({
+        const event: CalendarEvent = {
           summary: currentEvent.summary || 'Untitled',
           startTime: currentEvent.startTime,
           endTime: currentEvent.endTime,
           duration,
-        });
+          rrule: currentEvent.rrule,
+          uid: currentEvent.uid,
+        };
+
+        // Check for duplicate UID
+        if (event.uid) {
+          if (seenUIDs.has(event.uid)) {
+            // Skip this duplicate event entirely (silently)
+            inEvent = false;
+            continue;
+          }
+          seenUIDs.add(event.uid);
+        } else {
+          console.warn(`⚠️ Event without UID: "${event.summary}" at ${event.startTime?.toISOString()}`);
+        }
+
+        // Handle recurring events (RRULE)
+        if (event.rrule && event.startTime && event.endTime) {
+          console.log(`🔁 Found recurring event: ${event.summary}`);
+          const recurringEvents = expandRecurringEvent(event);
+          if (recurringEvents.length > 0) {
+            console.log(`🔁 Expanded into ${recurringEvents.length} instances`);
+            // Add expanded instances to events array
+            events.push(...recurringEvents);
+            // Mark original as processed so it doesn't get added again
+            event._isRecurringParent = true;
+          }
+        }
+
+        // Only add the event if it's not a recurring parent
+        if (!event._isRecurringParent) {
+          events.push(event);
+        }
       }
       inEvent = false;
-    } else if (inEvent) {
-      if (line.startsWith('SUMMARY:')) {
-        currentEvent.summary = line.substring(8);
-      } else if (line.startsWith('DTSTART')) {
-        const dateStr = line.split(':')[1];
-        currentEvent.startTime = parseDateString(dateStr);
-      } else if (line.startsWith('DTEND')) {
-        const dateStr = line.split(':')[1];
-        currentEvent.endTime = parseDateString(dateStr);
+    } else if (inEvent && line) {
+      // Parse event properties using the same approach as RoomTool
+      const colonIndex = line.indexOf(':');
+      if (colonIndex === -1) continue;
+
+      const key = line.substring(0, colonIndex);
+      const value = line.substring(colonIndex + 1);
+
+      if (key === 'SUMMARY') {
+        currentEvent.summary = value;
+      } else if (key.startsWith('DTSTART')) {
+        const parsedDate = parseDateString(value, key);
+        if (parsedDate) {
+          currentEvent.startTime = parsedDate;
+        }
+      } else if (key.startsWith('DTEND')) {
+        const parsedDate = parseDateString(value, key);
+        if (parsedDate) {
+          currentEvent.endTime = parsedDate;
+        }
+      } else if (key === 'RRULE') {
+        currentEvent.rrule = value;
+      } else if (key === 'UID') {
+        currentEvent.uid = value;
       }
     }
+  }
+
+  // Calculate date range of all events for debugging
+  if (events.length > 0) {
+    const dates = events.map(e => e.startTime.getTime());
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date(Math.max(...dates));
+    console.log(`📊 Parsed ${eventCount} total events, ${events.length} valid events with dates (including recurring instances)`);
+    console.log(`   Date range: ${minDate.toLocaleDateString()} to ${maxDate.toLocaleDateString()}`);
+    console.log(`   Sample events:`, events.slice(0, 3).map(e => `${e.summary} on ${e.startTime.toLocaleString()}`));
   }
 
   return events;
 }
 
-function parseDateString(dateStr: string): Date {
-  const year = parseInt(dateStr.substring(0, 4));
-  const month = parseInt(dateStr.substring(4, 6)) - 1;
-  const day = parseInt(dateStr.substring(6, 8));
-  const hour = parseInt(dateStr.substring(9, 11));
-  const minute = parseInt(dateStr.substring(11, 13));
-  const second = parseInt(dateStr.substring(13, 15));
+function parseDateString(dateStr: string, key?: string): Date | null {
+  try {
+    const cleanValue = dateStr.trim();
 
-  return new Date(Date.UTC(year, month, day, hour, minute, second));
+    if (!cleanValue || cleanValue.length < 8) {
+      return null;
+    }
+
+    // Handle timezone info in the key (e.g., DTSTART;TZID=Eastern Standard Time)
+    const tzidMatch = key ? key.match(/TZID=([^;:]+)/) : null;
+    const timezone = tzidMatch ? tzidMatch[1] : null;
+
+    // Parse date-only format (YYYYMMDD)
+    if (cleanValue.length === 8) {
+      const year = parseInt(cleanValue.substring(0, 4));
+      const month = parseInt(cleanValue.substring(4, 6)) - 1;
+      const day = parseInt(cleanValue.substring(6, 8));
+
+      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        return null;
+      }
+
+      return new Date(year, month, day);
+    }
+
+    // Parse datetime format (YYYYMMDDTHHMMSS or YYYYMMDDTHHMMSSZ)
+    if (cleanValue.length === 15 || cleanValue.length === 16) {
+      const year = parseInt(cleanValue.substring(0, 4));
+      const month = parseInt(cleanValue.substring(4, 6)) - 1;
+      const day = parseInt(cleanValue.substring(6, 8));
+      const hour = parseInt(cleanValue.substring(9, 11));
+      const minute = parseInt(cleanValue.substring(11, 13));
+      const second = parseInt(cleanValue.substring(13, 15));
+
+      if (isNaN(year) || isNaN(month) || isNaN(day) || isNaN(hour) || isNaN(minute) || isNaN(second)) {
+        return null;
+      }
+
+      // Handle UTC time (ends with Z)
+      if (cleanValue.endsWith('Z')) {
+        return new Date(Date.UTC(year, month, day, hour, minute, second));
+      }
+
+      // For timezone-aware dates or default: treat all as UTC
+      // This ensures consistent behavior regardless of browser timezone settings
+      return new Date(Date.UTC(year, month, day, hour, minute, second));
+    }
+
+    return null;
+  } catch (e) {
+    return null;
+  }
 }
 
 function getTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
@@ -106,15 +292,70 @@ function getTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
 }
 
 function calculateAverageHoursPerDay(events: CalendarEvent[], daysToCheck: number = 7): number {
+  // Use UTC dates to match the ICS event dates which are parsed as UTC
   const now = new Date();
-  const startDate = new Date(now);
-  startDate.setDate(startDate.getDate() - daysToCheck);
-  startDate.setHours(0, 0, 0, 0);
+  console.log(`🕐 Current date from browser: ${now.toString()}`);
+  console.log(`🕐 Current UTC date: ${now.toUTCString()}`);
 
-  const recentEvents = events.filter(event => event.startTime >= startDate);
+  const endDate = new Date(Date.UTC(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23, 59, 59, 999
+  ));
+
+  const startDate = new Date(endDate);
+  // Subtract (daysToCheck - 1) to get exactly daysToCheck days inclusive
+  // e.g., for 7 days: Oct 18 - 6 = Oct 12, giving us Oct 12-18 (7 days)
+  startDate.setUTCDate(startDate.getUTCDate() - (daysToCheck - 1));
+  startDate.setUTCHours(0, 0, 0, 0);
+
+  // Filter events within the date range (past daysToCheck days)
+  const recentEvents = events.filter(event => {
+    return event.startTime >= startDate && event.startTime <= endDate;
+  });
+
   const totalMinutes = recentEvents.reduce((sum, event) => sum + event.duration, 0);
-  const averageMinutesPerDay = totalMinutes / daysToCheck;
-  const averageHoursPerDay = averageMinutesPerDay / 60;
+  const totalHours = totalMinutes / 60;
+  const averageHoursPerDay = totalHours / daysToCheck;
+
+  // DETAILED LOGGING: Show exactly which events are being counted
+  console.log(`\n📊 === DETAILED EVENT BREAKDOWN ===`);
+  console.log(`Date range: ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`);
+  console.log(`Start date ISO: ${startDate.toISOString()}`);
+  console.log(`End date ISO: ${endDate.toISOString()}`);
+  console.log(`Total events in feed: ${events.length}`);
+  console.log(`Events in range: ${recentEvents.length}`);
+  console.log(`\n🔍 Events being counted:`);
+
+  // Group events by date for easier reading
+  const eventsByDate: Record<string, Array<{summary: string, duration: number, start: string}>> = {};
+  recentEvents.forEach(event => {
+    const dateKey = event.startTime.toLocaleDateString();
+    if (!eventsByDate[dateKey]) {
+      eventsByDate[dateKey] = [];
+    }
+    eventsByDate[dateKey].push({
+      summary: event.summary,
+      duration: event.duration,
+      start: event.startTime.toISOString()
+    });
+  });
+
+  Object.keys(eventsByDate).sort().forEach(date => {
+    const dayEvents = eventsByDate[date];
+    const dayHours = dayEvents.reduce((sum, e) => sum + e.duration, 0) / 60;
+    console.log(`\n  📅 ${date} (${dayHours.toFixed(2)} hours):`);
+    dayEvents.forEach(e => {
+      console.log(`    • ${e.summary} - ${(e.duration / 60).toFixed(2)}h (${e.start})`);
+    });
+  });
+
+  console.log(`\n📈 Summary:`);
+  console.log(`  Total hours: ${totalHours.toFixed(2)}`);
+  console.log(`  Days checked: ${daysToCheck}`);
+  console.log(`  Average hours/day: ${averageHoursPerDay.toFixed(2)}`);
+  console.log(`=================================\n`);
 
   return Math.round(averageHoursPerDay * 10) / 10;
 }
@@ -148,11 +389,15 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
 
   const fetchStats = async () => {
     try {
+      const fetchId = Math.random().toString(36).substring(7);
+      console.log(`\n🔵 === RoomStats fetchStats called (ID: ${fetchId}) ===`);
       const daysToCheck = getDaysForRange();
       const roomsToFetch = selectedRoom === 'all' ? ROOMS : ROOMS.filter(r => r.id === selectedRoom);
+      console.log(`Fetching ${roomsToFetch.length} rooms, ${daysToCheck} days`);
       const roomStats = await Promise.all(
         roomsToFetch.map(async (room) => {
           try {
+            console.log(`\n🏢 [${fetchId}] ========== FETCHING DATA FOR: ${room.name.toUpperCase()} ==========`);
             const response = await fetch(`${AZURE_FUNCTION_URL}?room=${room.id}`);
 
             if (!response.ok) {

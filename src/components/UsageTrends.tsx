@@ -25,59 +25,156 @@ interface RoomTrend {
   dailyUsage: DailyUsage[];
 }
 
+function expandRecurringEvent(parentEvent: any): Array<{ startTime: Date; endTime: Date }> {
+  const instances: Array<{ startTime: Date; endTime: Date }> = [];
+  const rrule = parentEvent.rrule;
+
+  if (!rrule) return instances;
+
+  const rruleParams: Record<string, string> = {};
+  rrule.split(';').forEach((param: string) => {
+    const [key, value] = param.split('=');
+    if (key && value) {
+      rruleParams[key] = value;
+    }
+  });
+
+  if (rruleParams.FREQ === 'WEEKLY' && rruleParams.BYDAY) {
+    const startDate = new Date(parentEvent.startTime);
+    const endDate = new Date(parentEvent.endTime);
+    const duration = endDate.getTime() - startDate.getTime();
+
+    let untilDate: Date | null = null;
+    if (rruleParams.UNTIL) {
+      const parsedUntil = parseDateString(rruleParams.UNTIL);
+      if (parsedUntil) {
+        untilDate = parsedUntil;
+      }
+    }
+
+    const dayMap: Record<string, number> = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+    const targetDay = dayMap[rruleParams.BYDAY];
+
+    if (targetDay !== undefined) {
+      const oneYearFromStart = new Date(startDate.getTime() + (365 * 24 * 60 * 60 * 1000));
+      const maxDate = untilDate || oneYearFromStart;
+
+      let currentDate = new Date(startDate);
+
+      while (currentDate.getDay() !== targetDay && currentDate < maxDate) {
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      while (currentDate <= maxDate) {
+        const instanceStart = new Date(currentDate);
+        const instanceEnd = new Date(instanceStart.getTime() + duration);
+
+        instances.push({
+          startTime: instanceStart,
+          endTime: instanceEnd,
+        });
+
+        currentDate.setDate(currentDate.getDate() + 7);
+      }
+    }
+  }
+
+  return instances;
+}
+
 function parseICSContent(icsContent: string, daysBack: number = 14): DailyUsage[] {
   const events: Array<{ startTime: Date; endTime: Date }> = [];
-  const lines = icsContent.split('\n');
+  const lines = icsContent.split(/\r?\n/);
+  const seenUIDs = new Set<string>(); // Track UIDs to detect duplicates
   let currentEvent: any = {};
   let inEvent = false;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    let line = lines[i] ? lines[i].trim() : '';
+
+    // Handle line continuation
+    while (i + 1 < lines.length && lines[i + 1] && (lines[i + 1].startsWith(' ') || lines[i + 1].startsWith('\t'))) {
+      i++;
+      line += lines[i] ? lines[i].substring(1) : '';
+    }
+
     if (line === 'BEGIN:VEVENT') {
       inEvent = true;
       currentEvent = {};
     } else if (line === 'END:VEVENT' && inEvent) {
       if (currentEvent.startTime && currentEvent.endTime) {
-        events.push({
-          startTime: currentEvent.startTime,
-          endTime: currentEvent.endTime,
-        });
+        // Check for duplicate UID
+        if (currentEvent.uid) {
+          if (seenUIDs.has(currentEvent.uid)) {
+            // Skip this duplicate event entirely
+            inEvent = false;
+            continue;
+          }
+          seenUIDs.add(currentEvent.uid);
+        }
+
+        // Handle recurring events (RRULE)
+        if (currentEvent.rrule) {
+          const recurringEvents = expandRecurringEvent(currentEvent);
+          events.push(...recurringEvents);
+        } else {
+          events.push({
+            startTime: currentEvent.startTime,
+            endTime: currentEvent.endTime,
+          });
+        }
       }
       inEvent = false;
-    } else if (inEvent) {
-      if (line.startsWith('DTSTART')) {
-        const dateStr = line.split(':')[1];
-        currentEvent.startTime = parseDateString(dateStr);
-      } else if (line.startsWith('DTEND')) {
-        const dateStr = line.split(':')[1];
-        currentEvent.endTime = parseDateString(dateStr);
+    } else if (inEvent && line) {
+      const colonIndex = line.indexOf(':');
+      if (colonIndex === -1) continue;
+
+      const key = line.substring(0, colonIndex);
+      const value = line.substring(colonIndex + 1);
+
+      if (key.startsWith('DTSTART')) {
+        const parsedDate = parseDateString(value, key);
+        if (parsedDate) currentEvent.startTime = parsedDate;
+      } else if (key.startsWith('DTEND')) {
+        const parsedDate = parseDateString(value, key);
+        if (parsedDate) currentEvent.endTime = parsedDate;
+      } else if (key === 'RRULE') {
+        currentEvent.rrule = value;
+      } else if (key === 'UID') {
+        currentEvent.uid = value;
       }
     }
   }
 
   // Group events by day
+  // Use UTC dates to match the ICS event dates which are parsed as UTC
   const now = new Date();
-  const startDate = new Date(now);
-  startDate.setDate(startDate.getDate() - daysBack);
-  startDate.setHours(0, 0, 0, 0);
+  const endDate = new Date(Date.UTC(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23, 59, 59, 999
+  ));
+
+  const startDate = new Date(endDate);
+  // Subtract (daysBack - 1) to get exactly daysBack days inclusive
+  startDate.setUTCDate(startDate.getUTCDate() - (daysBack - 1));
+  startDate.setUTCHours(0, 0, 0, 0);
 
   const dailyUsageMap: { [key: string]: number } = {};
 
   // Initialize all days to 0
   for (let i = 0; i < daysBack; i++) {
     const date = new Date(startDate);
-    date.setDate(date.getDate() + i);
+    date.setUTCDate(date.getUTCDate() + i);
     const dateKey = date.toISOString().split('T')[0];
     dailyUsageMap[dateKey] = 0;
   }
 
   // Calculate usage for each day
   events.forEach(event => {
-    const eventDate = new Date(event.startTime);
-    eventDate.setHours(0, 0, 0, 0);
-
-    if (eventDate >= startDate) {
-      const dateKey = eventDate.toISOString().split('T')[0];
+    if (event.startTime >= startDate && event.startTime <= endDate) {
+      const dateKey = event.startTime.toISOString().split('T')[0];
       const durationHours = (event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60 * 60);
 
       if (dailyUsageMap[dateKey] !== undefined) {
@@ -92,14 +189,59 @@ function parseICSContent(icsContent: string, daysBack: number = 14): DailyUsage[
   })).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-function parseDateString(dateStr: string): Date {
-  const year = parseInt(dateStr.substring(0, 4));
-  const month = parseInt(dateStr.substring(4, 6)) - 1;
-  const day = parseInt(dateStr.substring(6, 8));
-  const hour = parseInt(dateStr.substring(9, 11));
-  const minute = parseInt(dateStr.substring(11, 13));
-  const second = parseInt(dateStr.substring(13, 15));
-  return new Date(Date.UTC(year, month, day, hour, minute, second));
+function parseDateString(dateStr: string, key?: string): Date | null {
+  try {
+    const cleanValue = dateStr.trim();
+
+    if (!cleanValue || cleanValue.length < 8) {
+      return null;
+    }
+
+    // Handle timezone info in the key
+    const tzidMatch = key ? key.match(/TZID=([^;:]+)/) : null;
+    const timezone = tzidMatch ? tzidMatch[1] : null;
+
+    // Parse date-only format
+    if (cleanValue.length === 8) {
+      const year = parseInt(cleanValue.substring(0, 4));
+      const month = parseInt(cleanValue.substring(4, 6)) - 1;
+      const day = parseInt(cleanValue.substring(6, 8));
+
+      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        return null;
+      }
+
+      return new Date(year, month, day);
+    }
+
+    // Parse datetime format
+    if (cleanValue.length === 15 || cleanValue.length === 16) {
+      const year = parseInt(cleanValue.substring(0, 4));
+      const month = parseInt(cleanValue.substring(4, 6)) - 1;
+      const day = parseInt(cleanValue.substring(6, 8));
+      const hour = parseInt(cleanValue.substring(9, 11));
+      const minute = parseInt(cleanValue.substring(11, 13));
+      const second = parseInt(cleanValue.substring(13, 15));
+
+      if (isNaN(year) || isNaN(month) || isNaN(day) || isNaN(hour) || isNaN(minute) || isNaN(second)) {
+        return null;
+      }
+
+      if (cleanValue.endsWith('Z')) {
+        return new Date(Date.UTC(year, month, day, hour, minute, second));
+      }
+
+      if (timezone === 'Eastern Standard Time') {
+        return new Date(year, month, day, hour, minute, second);
+      }
+
+      return new Date(Date.UTC(year, month, day, hour, minute, second));
+    }
+
+    return null;
+  } catch (e) {
+    return null;
+  }
 }
 
 interface UsageTrendsProps {

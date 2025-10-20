@@ -1,12 +1,59 @@
 "use client";
 
 import { ClientPrincipal } from "@/types/auth";
+import { useEffect, useState } from "react";
+import { Cloud, CloudRain, CloudSnow, Sun, Wind } from "lucide-react";
 
 interface HeaderProps {
   user?: ClientPrincipal | null;
 }
 
+interface WeatherData {
+  temp: number;
+  condition: string;
+  description: string;
+}
+
 export function Header({ user }: HeaderProps) {
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch weather for Charlottesville, VA using wttr.in free API
+    fetch('https://wttr.in/Charlottesville,VA?format=j1')
+      .then(res => res.json())
+      .then(data => {
+        const current = data.current_condition[0];
+        setWeather({
+          temp: Math.round(parseFloat(current.temp_F)),
+          condition: current.weatherDesc[0].value,
+          description: current.weatherDesc[0].value
+        });
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching weather:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  const getWeatherIcon = () => {
+    if (!weather) return <Cloud className="w-5 h-5" />;
+
+    const condition = weather.condition.toLowerCase();
+    if (condition.includes('rain') || condition.includes('drizzle')) {
+      return <CloudRain className="w-5 h-5" />;
+    } else if (condition.includes('snow')) {
+      return <CloudSnow className="w-5 h-5" />;
+    } else if (condition.includes('clear') || condition.includes('sunny')) {
+      return <Sun className="w-5 h-5" />;
+    } else if (condition.includes('wind')) {
+      return <Wind className="w-5 h-5" />;
+    } else {
+      return <Cloud className="w-5 h-5" />;
+    }
+  };
+
   const handleLogout = () => {
     window.location.href = '/.auth/logout';
   };
@@ -60,6 +107,34 @@ export function Header({ user }: HeaderProps) {
             <h1 className="text-2xl font-bold">The Batten Space</h1>
             <p className="text-sm text-gray-300">Frank Batten School Digital Tools</p>
           </div>
+
+          {/* Weather Widget */}
+          <div className="flex items-center gap-3 px-4 py-2 bg-white/10 rounded-lg backdrop-blur-sm">
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-pulse">
+                  <Cloud className="w-5 h-5" />
+                </div>
+                <span className="text-sm">Loading...</span>
+              </div>
+            ) : weather ? (
+              <>
+                <div className="text-uva-orange">
+                  {getWeatherIcon()}
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold">{weather.temp}°F</p>
+                  <p className="text-xs text-gray-300">Charlottesville</p>
+                </div>
+                <div className="text-sm text-gray-200">
+                  {weather.description}
+                </div>
+              </>
+            ) : (
+              <span className="text-sm text-gray-300">Weather unavailable</span>
+            )}
+          </div>
+
           <div className="flex items-center gap-4">
             {user && (
               <div className="text-right">

@@ -41,6 +41,14 @@ const tools: Tool[] = [
     icon: "database",
     category: "Academic Resources",
   },
+  {
+    id: "4",
+    name: "Staff Directory",
+    description: "Search and browse contact information for Batten School faculty and staff",
+    url: "/staff-directory",
+    icon: "users",
+    category: "Resources",
+  },
 ];
 
 function getIcon(iconName: string) {

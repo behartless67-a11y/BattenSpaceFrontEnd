@@ -19,15 +19,30 @@ export function Header({ user }: HeaderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch weather for Charlottesville, VA using wttr.in free API
-    fetch('https://wttr.in/Charlottesville,VA?format=j1')
+    // Fetch weather for Charlottesville, VA using Open-Meteo free API (no key required, no CORS issues)
+    // Coordinates for Charlottesville, VA: 38.0293°N, 78.4767°W
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=38.0293&longitude=-78.4767&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FNew_York')
       .then(res => res.json())
       .then(data => {
-        const current = data.current_condition[0];
+        const current = data.current;
+        const weatherCode = current.weather_code;
+
+        // Map WMO weather codes to descriptions
+        const getWeatherDescription = (code: number) => {
+          if (code === 0) return 'Clear';
+          if (code <= 3) return 'Partly Cloudy';
+          if (code <= 48) return 'Foggy';
+          if (code <= 67) return 'Rainy';
+          if (code <= 77) return 'Snowy';
+          if (code <= 82) return 'Showers';
+          if (code <= 99) return 'Thunderstorm';
+          return 'Cloudy';
+        };
+
         setWeather({
-          temp: Math.round(parseFloat(current.temp_F)),
-          condition: current.weatherDesc[0].value,
-          description: current.weatherDesc[0].value
+          temp: Math.round(current.temperature_2m),
+          condition: getWeatherDescription(weatherCode),
+          description: getWeatherDescription(weatherCode)
         });
         setLoading(false);
       })

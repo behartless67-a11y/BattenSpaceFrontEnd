@@ -184,27 +184,14 @@ async function main() {
   const options = {
     removeBlackBars: true,
     normalizeColors: true,
-    brightness: 1.0,      // Adjust if photos are too dark (try 1.1) or too bright (try 0.9)
-    saturation: 1.0,      // Adjust if colors are too dull (try 1.2) or too vibrant (try 0.8)
-    contrast: 1.0,        // Adjust if contrast is too low (try 1.1) or too high (try 0.9)
-    targetAspectRatio: null  // e.g., "4:3" for consistent aspect ratio, or null to preserve
+    brightness: 1.05,     // Slightly brighter to compensate for typical underexposure
+    saturation: 1.05,     // Slightly more saturated for richer colors
+    contrast: 1.0,        // Keep contrast neutral
+    targetAspectRatio: null  // Preserve original aspect ratios
   };
 
-  // Process a single photo (for testing)
-  // await enhancePhoto(
-  //   path.join(photosDir, 'Chidester.jpeg'),
-  //   path.join(photosDir, 'Chidester_enhanced.jpeg'),
-  //   options
-  // );
-
-  // Or batch process all photos (commented out for safety)
-  // await batchEnhancePhotos(photosDir, options);
-
-  console.log('Use this script to enhance photos with:');
-  console.log('- Automatic black bar removal');
-  console.log('- Color normalization for consistency');
-  console.log('- Optional aspect ratio adjustment');
-  console.log('\nUncomment the desired function in main() to run.');
+  console.log('Starting batch enhancement of all staff photos...\n');
+  await batchEnhancePhotos(photosDir, options);
 }
 
 main();

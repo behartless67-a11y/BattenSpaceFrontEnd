@@ -36,7 +36,8 @@ export const staffDirectory: StaffMember[] = [
     position: "Postdoctoral Research Associate",
     biography: "Maura Austin is a postdoctoral researcher at the Frank Batten School of Leadership and Public Policy. She studies person perception, motivation, social judgment and decision making, and moral character judgment. Recent projects have focused on the cognitive processes that underlie how people think about moral character growth and how people make decisions about whether a transgressor deserves a second chance. In other work, Maura has focused on the social dynamics of gossip, competitive relationships, and collective long term goal pursuit.",
     firstName: "Maura",
-    lastName: "Austin"
+    lastName: "Austin",
+    photoFilename: "Austin"
   },
   {
     name: "Baumeister, Natalie Paige",
@@ -181,7 +182,8 @@ export const staffDirectory: StaffMember[] = [
     position: "Director of Development",
     biography: "Jon joins the Batten School from the Virginia Athletics Foundation where he has served for two years, most recently as Director of Major Gifts. While at VAF, Jon oversaw fundraising for the Kevin Sauer endowments supporting Men's and Women's Rowing, which have combined to eclipse over $2 Million in commitments since the project's launch in early 2023. Jon was also instrumental in establishing the Baseball Coaches Club, which has raised nearly $250k per year in future commitments by offering elevated stewardship to multi-year donors. Prior to joining VAF, Jon was an Associate Director of Development for the College Foundation of the University of Virginia. During his time in the College, Jon oversaw three volunteer fundraising boards, led fundraising for the unrestricted College Fund, and assumed major gift responsibility on a regional basis. Alongside six and a half years of development experience within the University, Jon also brings six years of experience in political campaigns, political fundraising, and institutional grant seeking. Jon is a 2010 graduate of the University (Government, Economics) and lives in Charlottesville with his wife, Maddie – who is a proud Double 'Hoo (BSN '16, MSN-PNP '23). When he is away from his work, you can expect to find Jon at the gym, listening to a podcast, or catching up on binge-worthy TV with Maddie and Avon – their exceedingly friendly tortoiseshell cat.",
     firstName: "Jon",
-    lastName: "Holmsted"
+    lastName: "Holmsted",
+    photoFilename: "Holmsted"
   },
   {
     name: "Licata, Gianpaolo Francesco",
@@ -282,7 +284,8 @@ export const staffDirectory: StaffMember[] = [
     position: "Associate Director of Development",
     biography: "Navin is a results-driven professional with a robust background in marketing and fundraising. With notable tenures at Vanderbilt University and Heineken, Navin has honed his skills in building meaningful partnerships, and contributing to the overall success of diverse projects. On weekends, you can find Navin coaching youth soccer, and enjoying moments with friends and family.",
     firstName: "Navin",
-    lastName: "Ramoutar"
+    lastName: "Ramoutar",
+    photoFilename: "Ramoutar"
   },
   {
     name: "Reinicke, Carey",
@@ -367,6 +370,7 @@ export const staffDirectory: StaffMember[] = [
     firstName: "Dakota",
     lastName: "Workman",
     building: "Garrett Hall – Lower Level",
-    officeNumber: "L056"
+    officeNumber: "L056",
+    photoFilename: "Workman"
   }
 ];

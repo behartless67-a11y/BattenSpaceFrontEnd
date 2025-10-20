@@ -74,45 +74,48 @@ export function Footer() {
   return (
     <footer className="bg-uva-navy text-white py-8 mt-auto">
       <div className="max-w-7xl mx-auto px-8">
-        {/* News Ticker */}
-        {headlines.length > 0 && (
-          <div className="mb-6 border-t border-white/20 pt-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-uva-orange">
-                <Newspaper className="w-5 h-5" />
-                <span className="text-sm font-semibold">Latest News</span>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <a
-                  href={currentHeadline?.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`block hover:text-uva-orange transition-all duration-500 ${
-                    isVisible ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  <p className="text-sm text-gray-200 truncate">
-                    {currentHeadline?.title}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {currentHeadline?.source}
-                  </p>
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-between items-center">
-          <div>
+        <div className="flex justify-between items-start">
+          {/* Left side - Logo and News Ticker */}
+          <div className="flex-1">
             <Image
               src="/bat_rgb_ko.png"
               alt="Frank Batten School of Leadership and Public Policy"
               width={250}
               height={75}
-              className="h-16 w-auto"
+              className="h-16 w-auto mb-4"
             />
+
+            {/* News Ticker */}
+            {headlines.length > 0 && (
+              <div className="max-w-md">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 text-uva-orange flex-shrink-0">
+                    <Newspaper className="w-4 h-4" />
+                    <span className="text-xs font-semibold">Latest News</span>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <a
+                      href={currentHeadline?.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`block hover:text-uva-orange transition-all duration-500 ${
+                        isVisible ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    >
+                      <p className="text-xs text-gray-200 truncate">
+                        {currentHeadline?.title}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {currentHeadline?.source}
+                      </p>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Right side - Contact Info */}
           <div className="text-right">
             <p className="text-sm text-gray-300 mb-1">
               Frank Batten School of Leadership and Public Policy<br />

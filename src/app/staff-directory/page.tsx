@@ -168,7 +168,8 @@ export default function StaffDirectory() {
                     <img
                       src={getPhotoPath(staff)}
                       alt={staff.name}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-cover object-center"
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
                       onError={(e) => {
                         // Try .jpg extension
                         const target = e.target as HTMLImageElement;

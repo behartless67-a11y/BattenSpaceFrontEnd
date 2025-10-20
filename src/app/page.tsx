@@ -52,7 +52,7 @@ const tools: Tool[] = [
 ];
 
 function getIcon(iconName: string) {
-  const iconClass = "w-8 h-8";
+  const iconClass = "w-7 h-7";
   switch (iconName) {
     case "wrench":
       return <Wrench className={iconClass} />;
@@ -272,38 +272,49 @@ export default function Home() {
 
           {/* Tools Grid */}
           <div className="mb-6">
-            <div className="mb-6">
+            <div className="mb-8">
               <h2 className="text-2xl font-bold text-uva-navy mb-2">Available Tools</h2>
               <div className="w-16 h-1 bg-uva-orange"></div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-auto">
               {tools.map((tool) => (
                     <a
                       key={tool.id}
                       href={tool.url}
                       target={tool.url.startsWith('/') ? '_self' : '_blank'}
                       rel="noopener noreferrer"
-                      className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-uva-orange h-full"
+                      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-100 hover:border-uva-orange hover:-translate-y-2 h-full"
                     >
-                      <div className="p-8 h-full flex flex-col">
-                        <div className="flex flex-col items-center text-center mb-6">
-                          <div className="w-20 h-20 rounded-lg bg-uva-navy group-hover:bg-uva-orange transition-colors duration-300 flex items-center justify-center text-white mb-4">
-                            {getIcon(tool.icon)}
+                      {/* Decorative corner accent */}
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-uva-orange/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                      <div className="p-6 h-full flex flex-col">
+                        <div className="flex flex-col items-center text-center mb-auto">
+                          {/* Icon with gradient background */}
+                          <div className="relative mb-4">
+                            <div className="absolute inset-0 bg-gradient-to-br from-uva-orange to-uva-navy rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"></div>
+                            <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-uva-navy to-uva-navy/80 group-hover:from-uva-orange group-hover:to-uva-orange/80 transition-all duration-300 flex items-center justify-center text-white shadow-md">
+                              {getIcon(tool.icon)}
+                            </div>
                           </div>
-                          <h3 className="text-2xl font-bold text-uva-navy mb-3 group-hover:text-uva-orange transition-colors">
+
+                          <h3 className="text-lg font-bold text-uva-navy mb-2 group-hover:text-uva-orange transition-colors">
                             {tool.name}
                           </h3>
-                          <p className="text-gray-600 text-base leading-relaxed">
+                          <p className="text-gray-600 text-sm leading-relaxed mb-4">
                             {tool.description}
                           </p>
                         </div>
-                        <div className="flex items-center justify-center text-uva-orange font-semibold text-base mt-auto">
+
+                        {/* Call to action */}
+                        <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100 text-uva-orange font-semibold text-sm">
                           <span className="group-hover:translate-x-1 transition-transform">
-                            Open Tool
+                            Launch
                           </span>
-                          <ExternalLink className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                          <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </div>
+
                       {/* Hover Effect Background */}
                       <div className="absolute inset-0 bg-gradient-to-br from-uva-orange/5 to-uva-navy/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </a>

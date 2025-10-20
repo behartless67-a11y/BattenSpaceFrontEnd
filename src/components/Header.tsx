@@ -18,6 +18,7 @@ export function Header({ user }: HeaderProps) {
     // Try to get name from claims first
     const claims = user.claims;
     if (claims) {
+      // Try givenname and surname claims (most reliable for Azure AD)
       const givenName = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname')?.val;
       const surname = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname')?.val;
 
@@ -25,18 +26,20 @@ export function Header({ user }: HeaderProps) {
         return `${givenName} ${surname}`;
       }
 
-      // Try alternative claim types
-      const name = claims.find(c => c.typ === 'name' || c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name')?.val;
-      if (name) return name;
-
+      // Try displayname claim
       const displayName = claims.find(c => c.typ === 'http://schemas.microsoft.com/identity/claims/displayname')?.val;
       if (displayName) return displayName;
+
+      // Try alternative name claim types
+      const name = claims.find(c => c.typ === 'name' || c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name')?.val;
+      if (name) return name;
     }
 
     // Fall back to userDetails
     const userDetails = user.userDetails;
+
     // If it's an email, extract the name part before @
-    if (userDetails.includes('@')) {
+    if (userDetails && userDetails.includes('@')) {
       const namePart = userDetails.split('@')[0];
       // Convert something like "john.doe" to "John Doe"
       return namePart.split('.').map(part =>
@@ -44,7 +47,7 @@ export function Header({ user }: HeaderProps) {
       ).join(' ');
     }
 
-    return userDetails;
+    return userDetails || 'User';
   };
 
   const displayName = getUserName();

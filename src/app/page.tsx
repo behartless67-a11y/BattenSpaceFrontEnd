@@ -78,37 +78,57 @@ export default function Home() {
 
   const categories = Array.from(new Set(tools.map((tool) => tool.category)));
 
-  // Extract first and last name from user info
+  // Extract user's full name and first name from claims
   const getUserName = () => {
     if (!userInfo?.clientPrincipal) return null;
 
     // Try to get name from claims first
     const claims = userInfo.clientPrincipal.claims;
     if (claims) {
+      // Try givenname and surname claims (most reliable for Azure AD)
       const givenName = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname')?.val;
       const surname = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname')?.val;
 
       if (givenName && surname) {
-        return `${givenName} ${surname}`;
+        return { full: `${givenName} ${surname}`, first: givenName };
       }
 
-      // Try alternative claim types
+      if (givenName) {
+        return { full: givenName, first: givenName };
+      }
+
+      // Try displayname claim
+      const displayName = claims.find(c => c.typ === 'http://schemas.microsoft.com/identity/claims/displayname')?.val;
+      if (displayName) {
+        const firstName = displayName.split(' ')[0];
+        return { full: displayName, first: firstName };
+      }
+
+      // Try alternative name claim types
       const name = claims.find(c => c.typ === 'name' || c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name')?.val;
-      if (name) return name;
+      if (name) {
+        const firstName = name.split(' ')[0];
+        return { full: name, first: firstName };
+      }
     }
 
     // Fall back to userDetails
     const userDetails = userInfo.clientPrincipal.userDetails;
+
     // If it's an email, extract the name part before @
-    if (userDetails.includes('@')) {
+    if (userDetails && userDetails.includes('@')) {
       const namePart = userDetails.split('@')[0];
       // Convert something like "john.doe" to "John Doe"
-      return namePart.split('.').map(part =>
+      const parts = namePart.split('.');
+      const fullName = parts.map(part =>
         part.charAt(0).toUpperCase() + part.slice(1)
       ).join(' ');
+      const firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+      return { full: fullName, first: firstName };
     }
 
-    return userDetails;
+    const fallbackName = userDetails || 'User';
+    return { full: fallbackName, first: fallbackName };
   };
 
   // Required groups - update these if needed
@@ -238,7 +258,10 @@ export default function Home() {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <h1 className="text-5xl font-bold mb-3 text-uva-navy animate-fade-in-up">
-              Welcome{getUserName() ? `, ${getUserName()}` : ''} to The Batten Space
+              Welcome{(() => {
+                const userName = getUserName();
+                return userName ? `, ${userName.first}` : '';
+              })()} to The Batten Space
             </h1>
             <div className="w-24 h-1 bg-uva-orange mx-auto mb-4 animate-fade-in-up animation-delay-200"></div>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto animate-fade-in-up animation-delay-400">

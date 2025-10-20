@@ -3,6 +3,7 @@
 import { ClientPrincipal } from "@/types/auth";
 import { useEffect, useState } from "react";
 import { Cloud, CloudRain, CloudSnow, Sun, Wind } from "lucide-react";
+import { lookupStaffMember } from "@/lib/staffLookup";
 
 interface HeaderProps {
   user?: ClientPrincipal | null;
@@ -86,27 +87,16 @@ export function Header({ user }: HeaderProps) {
     window.location.href = '/.auth/logout';
   };
 
-  // Extract user's actual name from claims
+  // Extract user's actual name from claims or staff directory
   const getUserName = () => {
     if (!user) return null;
 
-    // DEBUG: Log all available claims to see what we have
-    console.log('=== User Authentication Data ===');
-    console.log('userDetails:', user.userDetails);
-    console.log('Available claims:', user.claims);
-    if (user.claims) {
-      console.log('All claim types:', user.claims.map(c => c.typ));
-    }
-
-    // Try to get name from claims first
+    // Try to get name from claims first (if Azure AD provides them)
     const claims = user.claims;
     if (claims) {
       // Try givenname and surname claims (most reliable for Azure AD)
       const givenName = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname')?.val;
       const surname = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname')?.val;
-
-      console.log('Found givenName:', givenName);
-      console.log('Found surname:', surname);
 
       if (givenName && surname) {
         return `${givenName} ${surname}`;
@@ -114,30 +104,24 @@ export function Header({ user }: HeaderProps) {
 
       // Try alternative claim types
       const name = claims.find(c => c.typ === 'name' || c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name')?.val;
-      if (name) {
-        console.log('Found name claim:', name);
-        return name;
-      }
+      if (name) return name;
 
       const displayName = claims.find(c => c.typ === 'http://schemas.microsoft.com/identity/claims/displayname')?.val;
-      if (displayName) {
-        console.log('Found displayName claim:', displayName);
-        return displayName;
-      }
+      if (displayName) return displayName;
     }
 
-    console.log('No name claims found, falling back to userDetails');
-
-    // Fall back to userDetails
+    // Fall back to staff directory lookup
     const userDetails = user.userDetails;
+    if (userDetails) {
+      const staffName = lookupStaffMember(userDetails);
+      if (staffName) {
+        return staffName;
+      }
 
-    // If it's an email, extract the name part before @
-    if (userDetails && userDetails.includes('@')) {
-      const namePart = userDetails.split('@')[0];
-      // Convert something like "john.doe" to "John Doe"
-      return namePart.split('.').map(part =>
-        part.charAt(0).toUpperCase() + part.slice(1)
-      ).join(' ');
+      // If not in staff directory and it's an email, extract the computing ID
+      if (userDetails.includes('@')) {
+        return userDetails.split('@')[0];
+      }
     }
 
     return userDetails || 'User';

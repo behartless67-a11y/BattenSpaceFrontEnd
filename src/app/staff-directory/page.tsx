@@ -16,6 +16,37 @@ const getPhotoPath = (staff: StaffMember): string => {
   return `/staff-photos/${baseFilename}.jpeg`;
 };
 
+// Custom positioning for tight crop photos (shows more of the body)
+// Photos with ratio 1.0-1.45 tend to be very tight headshots and need lower positioning
+const getObjectPosition = (staff: StaffMember): string => {
+  const photoFilename = staff.photoFilename ||
+    (staff.lastName.charAt(0).toUpperCase() + staff.lastName.slice(1).toLowerCase().replace(/\s+/g, '-'));
+
+  // Tight crop photos that need to show more body (center 40-50% from top)
+  const tightCropPhotos = [
+    'Kirkland',      // 1.00 ratio - square
+    'Ramoutar',      // 1.00 ratio - square
+    'Smith',         // 1.00 ratio - square
+    'Fountain',      // 1.15 ratio
+    'Whelchel',      // 1.16 ratio - very tight on face
+    'Myung',         // 1.27 ratio
+    'Etienne',       // 1.30 ratio
+    'Flattery',      // 1.30 ratio
+    'Nelson_Kristine', // 1.33 ratio - very tight on face
+    'Robinson_John_M', // 1.33 ratio
+    'Reinicke',      // 1.36 ratio
+    'Holmsted, J',   // 1.41 ratio
+    'Holmsted',      // 1.41 ratio
+  ];
+
+  if (tightCropPhotos.includes(photoFilename)) {
+    return 'center 45%'; // Show more body by positioning lower
+  }
+
+  // Default positioning for most photos
+  return 'center 25%'; // Standard positioning
+};
+
 export default function StaffDirectory() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -168,8 +199,8 @@ export default function StaffDirectory() {
                     <img
                       src={getPhotoPath(staff)}
                       alt={staff.name}
-                      className="absolute inset-0 w-full h-full object-cover object-center"
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ objectFit: 'cover', objectPosition: getObjectPosition(staff) }}
                       onError={(e) => {
                         // Try .jpg extension
                         const target = e.target as HTMLImageElement;

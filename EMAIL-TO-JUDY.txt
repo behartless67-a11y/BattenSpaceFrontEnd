@@ -1,0 +1,38 @@
+Subject: Add Optional Claims to BattenSpace App Registration for Name Display
+
+Hi Judy,
+
+I hope you're doing well! I'm working on the BattenSpace frontend application (www.thebattenspace.org) and ran into a small issue with how user names are displayed.
+
+Currently, the app shows computing IDs (like "bh4hb") instead of actual names (like "Ben Hartless") when users log in. The app code is already written to extract names from Azure AD claims, but the App Registration needs to be configured to include those claims in the ID token.
+
+Could you please add the following optional claims to the BattenSpace App Registration?
+
+**App Registration Details:**
+- Client ID: 0b45a06e-6b4a-4c3e-80ff-01d0c11a9def
+- Tenant: UVA (7b3480c7-3707-4873-8b77-e216733a65ac)
+
+**Optional Claims to Add (ID Token):**
+1. given_name
+2. family_name
+3. name
+
+**Steps (if helpful):**
+1. In Azure Portal, go to App Registrations
+2. Find the app with Client ID above
+3. Click "Token configuration" in the left menu
+4. Click "+ Add optional claim"
+5. Select "ID" token type
+6. Check: given_name, family_name, and name
+7. Click "Add"
+8. If prompted about Microsoft Graph permissions, approve them
+
+**Why this is needed:**
+The application code checks for these claims to display user-friendly names like "Welcome, Ben to The Batten Space" instead of "Welcome, bh4hb to The Batten Space". Once these claims are added, users will need to log out and back in to see their actual names.
+
+This same App Registration is used by RoomTool (roomres.thebattenspace.org), so this change will benefit all BattenSpace applications.
+
+Let me know if you have any questions or need any clarification!
+
+Thanks so much,
+Ben

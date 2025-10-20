@@ -1,23 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Read(//c/Users/bh4hb/OneDrive - University of Virginia/Desktop/AI_Working/TheBattenSpace/**)",
-      "Bash(dir \"C:\\Users\\bh4hb\\OneDrive - University of Virginia\\Desktop\\AI_Working\\TheBattenSpace\")",
-      "Bash(dir:*)",
-      "Bash(git init:*)",
-      "Bash(git remote add:*)",
-      "Bash(git fetch:*)",
-      "Bash(xcopy:*)",
+      "Bash(ls:*)",
+      "Read(//c/Users/bh4hb/OneDrive - University of Virginia/Desktop/AI_Working/RoomTool/**)",
+      "Bash(npm run build:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git branch:*)",
-      "Bash(git push:*)",
-      "Bash(npm install)",
-      "Bash(git pull:*)",
-      "Bash(npm run dev:*)",
-      "Bash(mv:*)",
-      "Read(//c/Users/Ben/Desktop/AI_Projects/RoomTool/RoomTool/**)",
-      "Bash(That 's a total of 22.4 hours during this period.\"\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

@@ -19,11 +19,22 @@ export function Header({ user }: HeaderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Only fetch on client side
+    if (typeof window === 'undefined') return;
+
     // Fetch weather for Charlottesville, VA using Open-Meteo free API (no key required, no CORS issues)
     // Coordinates for Charlottesville, VA: 38.0293°N, 78.4767°W
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=38.0293&longitude=-78.4767&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FNew_York')
-      .then(res => res.json())
-      .then(data => {
+    const fetchWeather = async () => {
+      try {
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.0293&longitude=-78.4767&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FNew_York');
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Weather API response:', data); // Debug log
+
         const current = data.current;
         const weatherCode = current.weather_code;
 
@@ -45,11 +56,13 @@ export function Header({ user }: HeaderProps) {
           description: getWeatherDescription(weatherCode)
         });
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error('Error fetching weather:', err);
         setLoading(false);
-      });
+      }
+    };
+
+    fetchWeather();
   }, []);
 
   const getWeatherIcon = () => {

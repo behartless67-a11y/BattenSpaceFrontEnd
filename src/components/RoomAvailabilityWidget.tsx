@@ -9,25 +9,129 @@ interface RoomStatus {
   nextEvent?: string;
 }
 
+interface CalendarEvent {
+  summary: string;
+  startTime: Date;
+  endTime: Date;
+}
+
 export function RoomAvailabilityWidget() {
   const [rooms, setRooms] = useState<RoomStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [availableCount, setAvailableCount] = useState(0);
 
-  useEffect(() => {
-    // Mock data for now - this can be connected to actual room reservation API later
-    const mockRooms: RoomStatus[] = [
-      { name: "Great Hall 100", available: true },
-      { name: "Conference Room A", available: false, nextEvent: "2:00 PM" },
-      { name: "Seminar Room", available: true },
-      { name: "Student Lounge", available: true },
-      { name: "Pavilion X Upper Garden", available: false, nextEvent: "3:30 PM" },
-    ];
+  const ROOM_CONFIG = [
+    { id: "greathall", name: "Great Hall 100" },
+    { id: "confa", name: "Conference Room A L014" },
+    { id: "seminar", name: "Seminar Room L039" },
+    { id: "studentlounge206", name: "Student Lounge 206" },
+    { id: "pavx-upper", name: "Pavilion X Upper Garden" },
+  ];
 
-    setRooms(mockRooms);
-    setAvailableCount(mockRooms.filter(r => r.available).length);
-    setLoading(false);
+  useEffect(() => {
+    const fetchRoomStatus = async () => {
+      try {
+        const now = new Date();
+        const roomStatuses: RoomStatus[] = [];
+
+        for (const room of ROOM_CONFIG) {
+          try {
+            const response = await fetch(
+              `https://roomtool-calendar-function.azurewebsites.net/api/getcalendar?room=${room.id}`,
+              { cache: 'no-cache' }
+            );
+
+            if (!response.ok) {
+              roomStatuses.push({ name: room.name, available: true });
+              continue;
+            }
+
+            const data = await response.text();
+            const events = parseICS(data);
+
+            // Check if room is currently in use
+            const currentEvent = events.find(event =>
+              event.startTime <= now && event.endTime > now
+            );
+
+            if (currentEvent) {
+              roomStatuses.push({
+                name: room.name,
+                available: false,
+                nextEvent: formatTime(currentEvent.endTime)
+              });
+            } else {
+              // Find next upcoming event today
+              const nextEvent = events.find(event => event.startTime > now);
+              roomStatuses.push({
+                name: room.name,
+                available: true,
+                nextEvent: nextEvent ? formatTime(nextEvent.startTime) : undefined
+              });
+            }
+          } catch (err) {
+            console.error(`Error fetching ${room.name}:`, err);
+            roomStatuses.push({ name: room.name, available: true });
+          }
+        }
+
+        setRooms(roomStatuses);
+        setAvailableCount(roomStatuses.filter(r => r.available).length);
+      } catch (err) {
+        console.error('Error fetching room statuses:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRoomStatus();
   }, []);
+
+  // Simple ICS parser for events
+  const parseICS = (icsData: string): CalendarEvent[] => {
+    const events: CalendarEvent[] = [];
+    const lines = icsData.split('\n');
+    let currentEvent: Partial<CalendarEvent> = {};
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (line === 'BEGIN:VEVENT') {
+        currentEvent = {};
+      } else if (line.startsWith('DTSTART')) {
+        const dateStr = line.split(':')[1];
+        currentEvent.startTime = parseICSDate(dateStr);
+      } else if (line.startsWith('DTEND')) {
+        const dateStr = line.split(':')[1];
+        currentEvent.endTime = parseICSDate(dateStr);
+      } else if (line.startsWith('SUMMARY')) {
+        currentEvent.summary = line.substring(8);
+      } else if (line === 'END:VEVENT' && currentEvent.startTime && currentEvent.endTime) {
+        events.push(currentEvent as CalendarEvent);
+      }
+    }
+
+    return events;
+  };
+
+  const parseICSDate = (dateStr: string): Date => {
+    // Format: 20251020T140000Z or 20251020T140000
+    const year = parseInt(dateStr.substring(0, 4));
+    const month = parseInt(dateStr.substring(4, 6)) - 1;
+    const day = parseInt(dateStr.substring(6, 8));
+    const hour = parseInt(dateStr.substring(9, 11));
+    const minute = parseInt(dateStr.substring(11, 13));
+
+    return new Date(Date.UTC(year, month, day, hour, minute));
+  };
+
+  const formatTime = (date: Date): string => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
 
   if (loading) {
     return (

@@ -265,8 +265,8 @@ export default function Home() {
             </h1>
             <div className="w-24 h-1 bg-uva-orange mx-auto mb-4 animate-fade-in-up animation-delay-200"></div>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto animate-fade-in-up animation-delay-400">
-              Your central hub for digital tools and resources at the Frank Batten School of
-              Leadership and Public Policy
+              Your central hub for digital tools and resources<br />
+              at the Frank Batten School of Leadership and Public Policy
             </p>
           </div>
 

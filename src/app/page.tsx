@@ -3,8 +3,14 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ExternalLink, Wrench, Users, FileText, BarChart, Database, Calendar } from "lucide-react";
+import { ExternalLink, Wrench, Users, FileText, BarChart, Database, Calendar, Newspaper } from "lucide-react";
 import { UserInfo } from "@/types/auth";
+
+interface NewsHeadline {
+  title: string;
+  url: string;
+  source: string;
+}
 
 interface Tool {
   id: string;
@@ -77,6 +83,9 @@ export default function Home() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [headlines, setHeadlines] = useState<NewsHeadline[]>([]);
+  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [isNewsVisible, setIsNewsVisible] = useState(true);
 
   const categories = Array.from(new Set(tools.map((tool) => tool.category)));
 
@@ -181,6 +190,68 @@ export default function Home() {
       });
   }, []);
 
+  // Fetch news headlines
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const fetchNews = async () => {
+      try {
+        const feeds = [
+          'https://api.rss2json.com/v1/api.json?rss_url=https://news.virginia.edu/feed',
+          'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.npr.org/1001/rss.xml',
+        ];
+
+        const responses = await Promise.all(
+          feeds.map(url =>
+            fetch(url)
+              .then(res => res.json())
+              .catch(() => null)
+          )
+        );
+
+        const allHeadlines: NewsHeadline[] = [];
+
+        responses.forEach(data => {
+          if (data && data.status === 'ok' && data.items) {
+            data.items.slice(0, 5).forEach((item: any) => {
+              allHeadlines.push({
+                title: item.title,
+                url: item.link,
+                source: data.feed?.title || 'News'
+              });
+            });
+          }
+        });
+
+        if (allHeadlines.length > 0) {
+          setHeadlines(allHeadlines);
+        }
+      } catch (err) {
+        console.error('Error fetching news:', err);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  // Rotate news headlines
+  useEffect(() => {
+    if (headlines.length === 0) return;
+
+    const interval = setInterval(() => {
+      setIsNewsVisible(false);
+
+      setTimeout(() => {
+        setCurrentNewsIndex((prev) => (prev + 1) % headlines.length);
+        setIsNewsVisible(true);
+      }, 500);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [headlines]);
+
+  const currentHeadline = headlines[currentNewsIndex];
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -270,6 +341,35 @@ export default function Home() {
               Your central hub for digital tools and resources<br />
               at the Frank Batten School of Leadership and Public Policy
             </p>
+
+            {/* News Ticker */}
+            {headlines.length > 0 && (
+              <div className="mt-8 max-w-3xl mx-auto">
+                <div className="flex items-center justify-center gap-4 bg-white/60 backdrop-blur-sm rounded-xl px-6 py-3 shadow-md border border-gray-200">
+                  <div className="flex items-center gap-2 text-uva-orange flex-shrink-0">
+                    <Newspaper className="w-5 h-5" />
+                    <span className="text-sm font-semibold">Latest News</span>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <a
+                      href={currentHeadline?.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`block hover:text-uva-orange transition-all duration-500 ${
+                        isNewsVisible ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    >
+                      <p className="text-sm text-gray-700 font-medium truncate">
+                        {currentHeadline?.title}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {currentHeadline?.source}
+                      </p>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Tools Grid */}

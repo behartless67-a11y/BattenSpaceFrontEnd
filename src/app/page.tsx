@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ExternalLink, Wrench, Users, FileText, BarChart, Database, Calendar, Newspaper } from "lucide-react";
 import { UserInfo } from "@/types/auth";
+import { lookupStaffMember } from "@/lib/staffLookup";
 
 interface NewsHeadline {
   title: string;
@@ -89,7 +90,7 @@ export default function Home() {
 
   const categories = Array.from(new Set(tools.map((tool) => tool.category)));
 
-  // Extract user's full name and first name from claims
+  // Extract user's full name and first name from claims or staff directory
   const getUserName = () => {
     if (!userInfo?.clientPrincipal) return null;
 
@@ -123,19 +124,20 @@ export default function Home() {
       }
     }
 
-    // Fall back to userDetails
+    // Fall back to staff directory lookup
     const userDetails = userInfo.clientPrincipal.userDetails;
+    if (userDetails) {
+      const staffName = lookupStaffMember(userDetails);
+      if (staffName) {
+        const firstName = staffName.split(' ')[0];
+        return { full: staffName, first: firstName };
+      }
 
-    // If it's an email, extract the name part before @
-    if (userDetails && userDetails.includes('@')) {
-      const namePart = userDetails.split('@')[0];
-      // Convert something like "john.doe" to "John Doe"
-      const parts = namePart.split('.');
-      const fullName = parts.map(part =>
-        part.charAt(0).toUpperCase() + part.slice(1)
-      ).join(' ');
-      const firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-      return { full: fullName, first: firstName };
+      // If not in staff directory and it's an email, extract the computing ID
+      if (userDetails.includes('@')) {
+        const computingId = userDetails.split('@')[0];
+        return { full: computingId, first: computingId };
+      }
     }
 
     const fallbackName = userDetails || 'User';

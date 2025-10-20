@@ -170,9 +170,9 @@ export function Header({ user }: HeaderProps) {
           <div className="flex items-center gap-4">
             {user && (
               <div className="text-right">
-                <p className="text-sm font-semibold">Welcome, {firstName}</p>
+                <p className="text-sm font-semibold">{fullName}</p>
                 <p className="text-xs text-gray-300">
-                  {fullName}
+                  {user.userRoles.filter(role => role !== 'anonymous' && role !== 'authenticated').join(', ') || 'Staff'}
                 </p>
               </div>
             )}

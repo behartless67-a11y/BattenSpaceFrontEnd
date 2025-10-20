@@ -114,11 +114,11 @@ export function CurrentStatus({ selectedRoom }: CurrentStatusProps) {
 
   useEffect(() => {
     fetchRoomStatuses();
-    // Refresh every minute
+    // Refresh every 4 hours
     const interval = setInterval(() => {
       setCurrentTime(new Date());
       fetchRoomStatuses();
-    }, 60000);
+    }, 4 * 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, [selectedRoom]);
 
@@ -351,7 +351,7 @@ export function CurrentStatus({ selectedRoom }: CurrentStatusProps) {
       </div>
 
       <p className="text-xs text-gray-400 mt-4 text-center">
-        Refreshes automatically every minute
+        Refreshes automatically every 4 hours
       </p>
     </div>
   );

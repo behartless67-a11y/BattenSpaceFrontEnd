@@ -1,6 +1,7 @@
 "use client";
 
 import { ClientPrincipal } from "@/types/auth";
+import Image from 'next/image';
 
 interface HeaderProps {
   user?: ClientPrincipal | null;
@@ -53,9 +54,18 @@ export function Header({ user }: HeaderProps) {
     <header className="bg-uva-navy text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-8 py-4">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">The Batten Space</h1>
-            <p className="text-sm text-gray-300">Frank Batten School Digital Tools</p>
+          <div className="flex items-center gap-4">
+            <Image
+              src="/bat_rgb_ko.png"
+              alt="Frank Batten School of Leadership and Public Policy"
+              width={250}
+              height={75}
+              className="h-16 w-auto"
+            />
+            <div>
+              <h1 className="text-2xl font-bold">The Batten Space</h1>
+              <p className="text-sm text-gray-300">Frank Batten School Digital Tools</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             {user && (

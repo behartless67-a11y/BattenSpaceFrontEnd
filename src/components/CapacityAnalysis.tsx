@@ -128,8 +128,8 @@ export function CapacityAnalysis({ selectedTimeRange, selectedRoom }: CapacityAn
 
   useEffect(() => {
     fetchCapacityMetrics();
-    // Refresh every 15 minutes
-    const interval = setInterval(fetchCapacityMetrics, 15 * 60 * 1000);
+    // Refresh every 4 hours
+    const interval = setInterval(fetchCapacityMetrics, 4 * 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, [selectedTimeRange, selectedRoom]);
 

@@ -373,8 +373,8 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
 
   useEffect(() => {
     fetchStats();
-    // Refresh every 15 minutes
-    const interval = setInterval(fetchStats, 15 * 60 * 1000);
+    // Refresh every 4 hours
+    const interval = setInterval(fetchStats, 4 * 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, [selectedTimeRange, selectedRoom]);
 

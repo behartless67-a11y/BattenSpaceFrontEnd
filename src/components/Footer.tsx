@@ -9,9 +9,9 @@ export function Footer() {
             <Image
               src="/bat_rgb_ko.png"
               alt="Frank Batten School of Leadership and Public Policy"
-              width={200}
-              height={60}
-              className="h-12 w-auto"
+              width={250}
+              height={75}
+              className="h-16 w-auto"
             />
           </div>
           <div className="text-right">
@@ -20,7 +20,7 @@ export function Footer() {
                 href="mailto:battensupport@virginia.edu"
                 className="hover:text-uva-orange transition-colors"
               >
-                Support: battensupport@virginia.edu
+                battensupport@virginia.edu
               </a>
             </p>
           </div>

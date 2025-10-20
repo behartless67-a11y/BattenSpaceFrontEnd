@@ -90,6 +90,14 @@ export function Header({ user }: HeaderProps) {
   const getUserName = () => {
     if (!user) return null;
 
+    // DEBUG: Log all available claims to see what we have
+    console.log('=== User Authentication Data ===');
+    console.log('userDetails:', user.userDetails);
+    console.log('Available claims:', user.claims);
+    if (user.claims) {
+      console.log('All claim types:', user.claims.map(c => c.typ));
+    }
+
     // Try to get name from claims first
     const claims = user.claims;
     if (claims) {
@@ -97,18 +105,28 @@ export function Header({ user }: HeaderProps) {
       const givenName = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname')?.val;
       const surname = claims.find(c => c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname')?.val;
 
+      console.log('Found givenName:', givenName);
+      console.log('Found surname:', surname);
+
       if (givenName && surname) {
         return `${givenName} ${surname}`;
       }
 
-      // Try displayname claim
-      const displayName = claims.find(c => c.typ === 'http://schemas.microsoft.com/identity/claims/displayname')?.val;
-      if (displayName) return displayName;
-
-      // Try alternative name claim types
+      // Try alternative claim types
       const name = claims.find(c => c.typ === 'name' || c.typ === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name')?.val;
-      if (name) return name;
+      if (name) {
+        console.log('Found name claim:', name);
+        return name;
+      }
+
+      const displayName = claims.find(c => c.typ === 'http://schemas.microsoft.com/identity/claims/displayname')?.val;
+      if (displayName) {
+        console.log('Found displayName claim:', displayName);
+        return displayName;
+      }
     }
+
+    console.log('No name claims found, falling back to userDetails');
 
     // Fall back to userDetails
     const userDetails = user.userDetails;

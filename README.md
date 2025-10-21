@@ -293,6 +293,21 @@ For issues or questions:
 - Always use your **eservices account** (not SA account) to access Azure resources
 - Group membership changes may take a few minutes to propagate; users may need to log out and back in
 
+## Development Log
+
+### 2025-01-21
+- **Widget Layout Improvements**:
+  - Moved Room Availability and Upcoming Events widgets below Available Tools section
+  - Changed widget layout from 1-col/3-col to equal 2-column grid for side-by-side display
+  - Standardized widget styling with consistent padding (p-6) and equal heights (h-full flex flex-col)
+  - Temporarily commented out both widgets for future use (components still available in codebase)
+- **UI Enhancement**:
+  - Added exclamation point to welcome message for friendlier greeting (e.g., "Good morning, Ben!")
+- **Note**: Components `RoomAvailabilityWidget.tsx` and `UpcomingEventsWidget.tsx` remain in codebase for future re-enabling
+
+### Git Workflow Note
+**IMPORTANT**: Only push once after completing all changes. Avoid multiple pushes for the same work session to keep commit history clean.
+
 ## License
 
 © 2025 Frank Batten School of Leadership and Public Policy, University of Virginia

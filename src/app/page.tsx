@@ -471,11 +471,11 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Quick Info Widgets */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 max-w-6xl mx-auto">
+          {/* Quick Info Widgets - Temporarily removed but available in components/RoomAvailabilityWidget.tsx and components/UpcomingEventsWidget.tsx */}
+          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 max-w-6xl mx-auto">
             <RoomAvailabilityWidget />
             <UpcomingEventsWidget />
-          </div>
+          </div> */}
 
         </main>
 

@@ -346,7 +346,7 @@ export default function Home() {
               {getTimeBasedGreeting()}{(() => {
                 const userName = getUserName();
                 return userName ? `, ${userName.first}` : '';
-              })()}
+              })()}!
             </h1>
             <div className="w-24 h-1 bg-uva-orange mx-auto mb-4 animate-fade-in-up animation-delay-200"></div>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto animate-fade-in-up animation-delay-400">

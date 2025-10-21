@@ -135,7 +135,7 @@ export function RoomAvailabilityWidget() {
 
   if (loading) {
     return (
-      <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+      <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-md border border-gray-200 h-full">
         <div className="animate-pulse flex items-center gap-2">
           <div className="h-4 bg-gray-300 rounded w-24"></div>
         </div>
@@ -144,7 +144,7 @@ export function RoomAvailabilityWidget() {
   }
 
   return (
-    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg transition-shadow h-full flex flex-col">
       <div className="flex items-center gap-3 mb-3">
         <Calendar className="w-5 h-5 text-uva-orange" />
         <h3 className="font-semibold text-uva-navy">Room Availability</h3>

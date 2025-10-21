@@ -384,16 +384,8 @@ export default function Home() {
             )}
           </div>
 
-          {/* Quick Info Widgets */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 max-w-6xl mx-auto">
-            <RoomAvailabilityWidget />
-            <div className="lg:col-span-2">
-              <UpcomingEventsWidget />
-            </div>
-          </div>
-
           {/* Tools Grid */}
-          <div className="mb-6">
+          <div className="mb-12">
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-uva-navy mb-2">Available Tools</h2>
               <div className="w-16 h-1 bg-uva-orange"></div>
@@ -477,6 +469,12 @@ export default function Home() {
                     )
               ))}
             </div>
+          </div>
+
+          {/* Quick Info Widgets */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 max-w-6xl mx-auto">
+            <RoomAvailabilityWidget />
+            <UpcomingEventsWidget />
           </div>
 
         </main>

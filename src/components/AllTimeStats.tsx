@@ -27,8 +27,20 @@ const ROOM_ICS_FILES: Record<string, string> = {
   'pavx-exhibit': 'ConfA.ics',
 };
 
+const ROOM_IDENTIFIERS: Record<string, string> = {
+  'confa': 'FBS-ConfA-L014',
+  'greathall': 'FBS-GreatHall-100',
+  'seminar': 'FBS-SeminarRoom-L039',
+  'studentlounge206': 'FBS-StudentLounge-206',
+  'pavx-upper': 'FBS-PavX-UpperGarden',
+  'pavx-b1': 'FBS-PavX-BasementRoom1',
+  'pavx-b2': 'FBS-PavX-BasementRoom2',
+  'pavx-exhibit': 'FBS-PavX-',
+};
+
 interface CalendarEvent {
   summary: string;
+  location?: string;
   startTime: Date;
   endTime: Date;
   duration: number; // in minutes
@@ -99,6 +111,7 @@ function expandRecurringEvent(parentEvent: any): CalendarEvent[] {
 
         instances.push({
           summary: parentEvent.summary || 'Untitled',
+          location: parentEvent.location,
           startTime: instanceStart,
           endTime: instanceEnd,
           duration: duration / (1000 * 60),
@@ -190,6 +203,7 @@ function parseICSContent(icsContent: string): CalendarEvent[] {
         const duration = (currentEvent.endTime.getTime() - currentEvent.startTime.getTime()) / (1000 * 60);
         const event: any = {
           summary: currentEvent.summary,
+          location: currentEvent.location,
           startTime: currentEvent.startTime,
           endTime: currentEvent.endTime,
           duration,
@@ -215,6 +229,8 @@ function parseICSContent(icsContent: string): CalendarEvent[] {
 
       if (key === 'SUMMARY') {
         currentEvent.summary = value;
+      } else if (key === 'LOCATION') {
+        currentEvent.location = value;
       } else if (key.startsWith('DTSTART')) {
         const parsedDate = parseDateString(value, key);
         if (parsedDate) currentEvent.startTime = parsedDate;
@@ -350,7 +366,11 @@ export function AllTimeStats({ selectedRoom }: AllTimeStatsProps) {
           }
 
           const icsContent = await response.text();
-          const events = parseICSContent(icsContent);
+          const allEvents = parseICSContent(icsContent);
+          const roomIdentifier = ROOM_IDENTIFIERS[room.id];
+          const events = roomIdentifier
+            ? allEvents.filter(event => event.location && event.location.includes(roomIdentifier))
+            : allEvents;
           const stats = calculateAllTimeStats(events);
 
           return { roomId: room.id, data: stats };

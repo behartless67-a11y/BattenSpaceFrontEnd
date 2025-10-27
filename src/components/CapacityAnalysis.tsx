@@ -30,6 +30,17 @@ const ROOM_ICS_FILES: Record<string, string> = {
   'pavx-exhibit': 'ConfA.ics',
 };
 
+const ROOM_IDENTIFIERS: Record<string, string> = {
+  'confa': 'FBS-ConfA-L014',
+  'greathall': 'FBS-GreatHall-100',
+  'seminar': 'FBS-SeminarRoom-L039',
+  'studentlounge206': 'FBS-StudentLounge-206',
+  'pavx-upper': 'FBS-PavX-UpperGarden',
+  'pavx-b1': 'FBS-PavX-BasementRoom1',
+  'pavx-b2': 'FBS-PavX-BasementRoom2',
+  'pavx-exhibit': 'FBS-PavX-',
+};
+
 interface CapacityMetrics {
   roomId: string;
   roomName: string;
@@ -43,6 +54,7 @@ interface CapacityMetrics {
 
 interface CalendarEvent {
   summary: string;
+  location?: string;
   startTime: Date;
   endTime: Date;
   duration: number;
@@ -71,6 +83,7 @@ function parseICSContent(icsContent: string): CalendarEvent[] {
         const duration = (currentEvent.endTime.getTime() - currentEvent.startTime.getTime()) / (1000 * 60);
         events.push({
           summary: currentEvent.summary || 'Untitled',
+          location: currentEvent.location,
           startTime: currentEvent.startTime,
           endTime: currentEvent.endTime,
           duration,
@@ -80,6 +93,8 @@ function parseICSContent(icsContent: string): CalendarEvent[] {
     } else if (inEvent) {
       if (line.startsWith('SUMMARY:')) {
         currentEvent.summary = line.substring(8);
+      } else if (line.startsWith('LOCATION:')) {
+        currentEvent.location = line.substring(9);
       } else if (line.startsWith('DTSTART')) {
         const dateStr = line.split(':')[1];
         currentEvent.startTime = parseDateString(dateStr);
@@ -183,7 +198,11 @@ export function CapacityAnalysis({ selectedTimeRange, selectedRoom }: CapacityAn
             }
 
             const icsContent = await response.text();
-            const events = parseICSContent(icsContent);
+            const allEvents = parseICSContent(icsContent);
+            const roomIdentifier = ROOM_IDENTIFIERS[room.id];
+            const events = roomIdentifier
+              ? allEvents.filter(event => event.location && event.location.includes(roomIdentifier))
+              : allEvents;
             const { utilizationRate, totalHours, availableHours, peakUtilization } =
               calculateCapacityMetrics(events, daysToCheck);
 

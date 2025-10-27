@@ -30,6 +30,17 @@ const ROOM_ICS_FILES: Record<string, string> = {
   'pavx-exhibit': 'ConfA.ics',
 };
 
+const ROOM_IDENTIFIERS: Record<string, string> = {
+  'confa': 'FBS-ConfA-L014',
+  'greathall': 'FBS-GreatHall-100',
+  'seminar': 'FBS-SeminarRoom-L039',
+  'studentlounge206': 'FBS-StudentLounge-206',
+  'pavx-upper': 'FBS-PavX-UpperGarden',
+  'pavx-b1': 'FBS-PavX-BasementRoom1',
+  'pavx-b2': 'FBS-PavX-BasementRoom2',
+  'pavx-exhibit': 'FBS-PavX-',
+};
+
 const HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -41,7 +52,7 @@ interface HeatmapData {
   };
 }
 
-function parseICSContent(icsContent: string): HeatmapData[string] {
+function parseICSContent(icsContent: string, roomIdentifier?: string): HeatmapData[string] {
   const heatmapData: HeatmapData[string] = {};
 
   // Initialize structure
@@ -63,6 +74,12 @@ function parseICSContent(icsContent: string): HeatmapData[string] {
       currentEvent = {};
     } else if (line === 'END:VEVENT' && inEvent) {
       if (currentEvent.startTime && currentEvent.endTime) {
+        // Filter by room identifier if provided
+        if (roomIdentifier && currentEvent.location && !currentEvent.location.includes(roomIdentifier)) {
+          inEvent = false;
+          continue;
+        }
+
         // Get day of week (0 = Sunday, 1 = Monday, etc.)
         const dayOfWeek = currentEvent.startTime.getDay();
         // Convert to Monday = 0, Sunday = 6
@@ -86,6 +103,8 @@ function parseICSContent(icsContent: string): HeatmapData[string] {
       } else if (line.startsWith('DTEND')) {
         const dateStr = line.split(':')[1];
         currentEvent.endTime = parseDateString(dateStr);
+      } else if (line.startsWith('LOCATION:')) {
+        currentEvent.location = line.substring(9);
       }
     }
   }
@@ -147,7 +166,8 @@ export function PeakHoursHeatmap({ selectedRoom }: PeakHoursHeatmapProps) {
             }
 
             const icsContent = await response.text();
-            allData[room.id] = parseICSContent(icsContent);
+            const roomIdentifier = ROOM_IDENTIFIERS[room.id];
+            allData[room.id] = parseICSContent(icsContent, roomIdentifier);
           } catch (error) {
             console.error(`Error fetching heatmap for ${room.name}:`, error);
             allData[room.id] = {};

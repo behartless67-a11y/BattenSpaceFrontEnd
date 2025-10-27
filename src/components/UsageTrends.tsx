@@ -27,6 +27,17 @@ const ROOM_ICS_FILES: Record<string, string> = {
   'pavx-exhibit': 'ConfA.ics',
 };
 
+const ROOM_IDENTIFIERS: Record<string, string> = {
+  'confa': 'FBS-ConfA-L014',
+  'greathall': 'FBS-GreatHall-100',
+  'seminar': 'FBS-SeminarRoom-L039',
+  'studentlounge206': 'FBS-StudentLounge-206',
+  'pavx-upper': 'FBS-PavX-UpperGarden',
+  'pavx-b1': 'FBS-PavX-BasementRoom1',
+  'pavx-b2': 'FBS-PavX-BasementRoom2',
+  'pavx-exhibit': 'FBS-PavX-',
+};
+
 interface DailyUsage {
   date: string;
   hours: number;
@@ -39,8 +50,8 @@ interface RoomTrend {
   dailyUsage: DailyUsage[];
 }
 
-function expandRecurringEvent(parentEvent: any): Array<{ startTime: Date; endTime: Date }> {
-  const instances: Array<{ startTime: Date; endTime: Date }> = [];
+function expandRecurringEvent(parentEvent: any): Array<{ startTime: Date; endTime: Date; location?: string }> {
+  const instances: Array<{ startTime: Date; endTime: Date; location?: string }> = [];
   const rrule = parentEvent.rrule;
 
   if (!rrule) return instances;
@@ -86,6 +97,7 @@ function expandRecurringEvent(parentEvent: any): Array<{ startTime: Date; endTim
         instances.push({
           startTime: instanceStart,
           endTime: instanceEnd,
+          location: parentEvent.location,
         });
 
         currentDate.setDate(currentDate.getDate() + 7);
@@ -96,8 +108,8 @@ function expandRecurringEvent(parentEvent: any): Array<{ startTime: Date; endTim
   return instances;
 }
 
-function parseICSContent(icsContent: string, daysBack: number = 14): DailyUsage[] {
-  const events: Array<{ startTime: Date; endTime: Date }> = [];
+function parseICSContent(icsContent: string, daysBack: number = 14, roomIdentifier?: string): DailyUsage[] {
+  const events: Array<{ startTime: Date; endTime: Date; location?: string }> = [];
   const lines = icsContent.split(/\r?\n/);
   const seenUIDs = new Set<string>(); // Track UIDs to detect duplicates
   let currentEvent: any = {};
@@ -127,6 +139,12 @@ function parseICSContent(icsContent: string, daysBack: number = 14): DailyUsage[
           seenUIDs.add(currentEvent.uid);
         }
 
+        // Filter by room identifier if provided
+        if (roomIdentifier && currentEvent.location && !currentEvent.location.includes(roomIdentifier)) {
+          inEvent = false;
+          continue;
+        }
+
         // Handle recurring events (RRULE)
         if (currentEvent.rrule) {
           const recurringEvents = expandRecurringEvent(currentEvent);
@@ -135,6 +153,7 @@ function parseICSContent(icsContent: string, daysBack: number = 14): DailyUsage[
           events.push({
             startTime: currentEvent.startTime,
             endTime: currentEvent.endTime,
+            location: currentEvent.location,
           });
         }
       }
@@ -156,6 +175,8 @@ function parseICSContent(icsContent: string, daysBack: number = 14): DailyUsage[
         currentEvent.rrule = value;
       } else if (key === 'UID') {
         currentEvent.uid = value;
+      } else if (key === 'LOCATION') {
+        currentEvent.location = value;
       }
     }
   }
@@ -306,7 +327,8 @@ export function UsageTrends({ selectedTimeRange, selectedRoom }: UsageTrendsProp
             }
 
             const icsContent = await response.text();
-            const dailyUsage = parseICSContent(icsContent, daysBack);
+            const roomIdentifier = ROOM_IDENTIFIERS[room.id];
+            const dailyUsage = parseICSContent(icsContent, daysBack, roomIdentifier);
 
             return {
               roomId: room.id,

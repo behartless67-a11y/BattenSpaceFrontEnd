@@ -43,6 +43,7 @@ const ROOM_IDENTIFIERS: Record<string, string> = {
 
 interface CalendarEvent {
   summary: string;
+  location?: string;
   startTime: Date;
   endTime: Date;
 }
@@ -82,6 +83,8 @@ function parseICSContent(icsContent: string): CalendarEvent[] {
     } else if (inEvent) {
       if (line.startsWith('SUMMARY:')) {
         currentEvent.summary = line.substring(8);
+      } else if (line.startsWith('LOCATION:')) {
+        currentEvent.location = line.substring(9);
       } else if (line.startsWith('DTSTART')) {
         const dateStr = line.split(':')[1];
         currentEvent.startTime = parseDateString(dateStr);
@@ -107,7 +110,7 @@ function parseDateString(dateStr: string): Date {
 }
 
 function filterEventsByRoom(events: CalendarEvent[], roomIdentifier: string): CalendarEvent[] {
-  return events.filter(event => event.summary && event.summary.includes(roomIdentifier));
+  return events.filter(event => event.location && event.location.includes(roomIdentifier));
 }
 
 function formatTime(date: Date): string {

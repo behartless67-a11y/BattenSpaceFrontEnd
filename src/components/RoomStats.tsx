@@ -64,6 +64,7 @@ interface StatsData {
 
 interface CalendarEvent {
   summary: string;
+  location?: string;
   startTime: Date;
   endTime: Date;
   duration: number;
@@ -221,6 +222,8 @@ function parseICSContent(icsContent: string): CalendarEvent[] {
 
       if (key === 'SUMMARY') {
         currentEvent.summary = value;
+      } else if (key === 'LOCATION') {
+        currentEvent.location = value;
       } else if (key.startsWith('DTSTART')) {
         const parsedDate = parseDateString(value, key);
         if (parsedDate) {
@@ -307,9 +310,9 @@ function parseDateString(dateStr: string, key?: string): Date | null {
 }
 
 function filterEventsByRoom(events: CalendarEvent[], roomIdentifier: string): CalendarEvent[] {
-  // Filter events that contain the room identifier in their summary
+  // Filter events that contain the room identifier in their location field
   return events.filter(event => {
-    return event.summary && event.summary.includes(roomIdentifier);
+    return event.location && event.location.includes(roomIdentifier);
   });
 }
 

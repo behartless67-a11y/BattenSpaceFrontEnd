@@ -14,20 +14,19 @@ const ROOMS = [
   { id: 'pavx-exhibit', name: 'Pav X Exhibit' },
 ];
 
-// ICS files are publicly available at roomres.thebattenspace.org
+// ICS files are from Outlook calendars
 // Using CORS proxy to bypass CORS restrictions
 const CORS_PROXY = 'https://corsproxy.io/?';
-const ICS_BASE_URL = 'https://roomres.thebattenspace.org/ics/';
 
-const ROOM_ICS_FILES: Record<string, string> = {
-  'confa': 'ConfA.ics',
-  'greathall': 'GreatHall.ics',
-  'seminar': 'SeminarRoom.ics',
-  'studentlounge206': 'ConfA.ics',
-  'pavx-upper': 'ConfA.ics',
-  'pavx-b1': 'ConfA.ics',
-  'pavx-b2': 'ConfA.ics',
-  'pavx-exhibit': 'ConfA.ics',
+const ROOM_ICS_URLS: Record<string, string> = {
+  'confa': 'https://outlook.office365.com/owa/calendar/4207f27aa0d54d318d660537325a3856@virginia.edu/64228c013c3c425ca3ec6682642a970e8523251041637520167/calendar.ics',
+  'greathall': 'https://outlook.office365.com/owa/calendar/cf706332e50c45009e2b3164e0b68ca0@virginia.edu/6960c19164584f9cbb619329600a490a16019380931273154626/calendar.ics',
+  'seminar': 'https://outlook.office365.com/owa/calendar/4cedc3f0284648fcbee80dd7f6563bab@virginia.edu/211f4d478ee94feb8fe74fa4ed82a0b22636302730039956374/calendar.ics',
+  'studentlounge206': 'https://outlook.office365.com/owa/calendar/bfd63ea7933c4c3d965a632e5d6b703d@virginia.edu/05f41146b7274347a5e374b91f0e7eda6953039659626971784/calendar.ics',
+  'pavx-upper': 'https://outlook.office365.com/owa/calendar/52b9b2d41868473fac5d3e9963512a9b@virginia.edu/311e34fd14384759b006ccf185c1db677813060047149602177/calendar.ics',
+  'pavx-b1': 'https://outlook.office365.com/owa/calendar/fa3ecb9b47824ac0a36733c7212ccc97@virginia.edu/d23afabf93da4fa4b49d2be3ce290f7911116129854936607531/calendar.ics',
+  'pavx-b2': 'https://outlook.office365.com/owa/calendar/3f60cb3359dd40f7943b9de3b062b18d@virginia.edu/1e78265cf5eb44da903745ca3d872e6910017444746788834359/calendar.ics',
+  'pavx-exhibit': 'https://outlook.office365.com/owa/calendar/4df4134c83844cef9d9357180ccfb48c@virginia.edu/e46a84ae5d8842d4b33a842ddc5ff66c11207228220277930183/calendar.ics',
 };
 
 const ROOM_IDENTIFIERS: Record<string, string> = {
@@ -154,12 +153,12 @@ export function PeakHoursHeatmap({ selectedRoom }: PeakHoursHeatmapProps) {
       await Promise.all(
         ROOMS.map(async (room) => {
           try {
-            const icsFile = ROOM_ICS_FILES[room.id];
-            if (!icsFile) {
+            const icsUrl = ROOM_ICS_URLS[room.id];
+            if (!icsUrl) {
               allData[room.id] = {};
               return;
             }
-            const response = await fetch(`${CORS_PROXY}${encodeURIComponent(ICS_BASE_URL + icsFile)}`);
+            const response = await fetch(`${CORS_PROXY}${encodeURIComponent(icsUrl)}`);
             if (!response.ok) {
               allData[room.id] = {};
               return;

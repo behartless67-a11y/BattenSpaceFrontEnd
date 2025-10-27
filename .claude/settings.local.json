@@ -11,7 +11,11 @@
       "Bash(curl:*)",
       "Bash(for file in CurrentStatus.tsx UsageTrends.tsx RoomAvailabilityWidget.tsx CapacityAnalysis.tsx PeakHoursHeatmap.tsx AllTimeStats.tsx)",
       "Bash(do)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(for file in StudentLounge-206.ics StudentLounge.ics PavX-BasementRoom2.ics PavX-BasementRoom1.ics PavX-Upper.ics PavX-UpperGarden.ics)",
+      "Bash(do echo -n \"Checking $file: \")",
+      "Bash(for file in src/components/CapacityAnalysis.tsx src/components/PeakHoursHeatmap.tsx src/components/AllTimeStats.tsx)",
+      "Bash(do echo \"Updating $file\")"
     ],
     "deny": [],
     "ask": []

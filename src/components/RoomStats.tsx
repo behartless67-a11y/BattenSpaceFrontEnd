@@ -31,6 +31,18 @@ const ROOM_ICS_FILES: Record<string, string> = {
   'pavx-exhibit': 'ConfA.ics',
 };
 
+// Room identifier in ICS event summaries (format: FBS-RoomName-Number)
+const ROOM_IDENTIFIERS: Record<string, string> = {
+  'confa': 'FBS-ConfA-L014',
+  'greathall': 'FBS-GreatHall-100',
+  'seminar': 'FBS-SeminarRoom-L039',
+  'studentlounge206': 'FBS-StudentLounge-206',
+  'pavx-upper': 'FBS-PavX-UpperGarden',
+  'pavx-b1': 'FBS-PavX-BasementRoom1',
+  'pavx-b2': 'FBS-PavX-BasementRoom2',
+  'pavx-exhibit': 'FBS-PavX-', // Need to find the exact identifier
+};
+
 interface RoomStat {
   id: string;
   name: string;
@@ -294,6 +306,13 @@ function parseDateString(dateStr: string, key?: string): Date | null {
   }
 }
 
+function filterEventsByRoom(events: CalendarEvent[], roomIdentifier: string): CalendarEvent[] {
+  // Filter events that contain the room identifier in their summary
+  return events.filter(event => {
+    return event.summary && event.summary.includes(roomIdentifier);
+  });
+}
+
 function getTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -441,9 +460,16 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
             }
 
             const icsContent = await response.text();
-            const events = parseICSContent(icsContent);
-            const todayEvents = getTodayEvents(events);
-            const averageHoursPerDay = calculateAverageHoursPerDay(events, daysToCheck);
+            const allEvents = parseICSContent(icsContent);
+
+            // Filter events for this specific room
+            const roomIdentifier = ROOM_IDENTIFIERS[room.id];
+            const roomEvents = roomIdentifier ? filterEventsByRoom(allEvents, roomIdentifier) : allEvents;
+
+            console.log(`📊 Filtered ${roomEvents.length} events for ${room.name} (from ${allEvents.length} total)`);
+
+            const todayEvents = getTodayEvents(roomEvents);
+            const averageHoursPerDay = calculateAverageHoursPerDay(roomEvents, daysToCheck);
 
             return {
               id: room.id,

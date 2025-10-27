@@ -467,6 +467,9 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
 
             // Filter events for this specific room
             const roomIdentifier = ROOM_IDENTIFIERS[room.id];
+            console.log(`🔍 Looking for room identifier: "${roomIdentifier}"`);
+            console.log(`📋 Sample event locations:`, allEvents.slice(0, 3).map(e => ({ summary: e.summary, location: e.location })));
+
             const roomEvents = roomIdentifier ? filterEventsByRoom(allEvents, roomIdentifier) : allEvents;
 
             console.log(`📊 Filtered ${roomEvents.length} events for ${room.name} (from ${allEvents.length} total)`);

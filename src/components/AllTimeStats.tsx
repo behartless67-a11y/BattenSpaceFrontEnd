@@ -11,17 +11,7 @@ const ROOMS = [
   { id: 'pavx-upper', name: 'Pavilion X Upper', building: 'Pavilion X' },
 ];
 
-// ICS files are publicly available at roomres.thebattenspace.org
-const ROOM_ICS_MAPPING: Record<string, string> = {
-  'confa': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'greathall': 'https://roomres.thebattenspace.org/ics/GreatHall.ics',
-  'seminar': 'https://roomres.thebattenspace.org/ics/SeminarRoom.ics',
-  'studentlounge206': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'pavx-upper': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'pavx-b1': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'pavx-b2': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'pavx-exhibit': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-};
+// Use API proxy to fetch ICS files (bypasses CORS restrictions)
 
 interface CalendarEvent {
   summary: string;
@@ -336,11 +326,7 @@ export function AllTimeStats({ selectedRoom }: AllTimeStatsProps) {
 
       const dataPromises = roomsToFetch.map(async (room) => {
         try {
-          const icsUrl = ROOM_ICS_MAPPING[room.id];
-          if (!icsUrl) {
-            return { roomId: room.id, data: null };
-          }
-          const response = await fetch(icsUrl, { mode: 'cors' });
+          const response = await fetch(`/api/calendar?room=${room.id}`);
           if (!response.ok) {
             return { roomId: room.id, data: null };
           }

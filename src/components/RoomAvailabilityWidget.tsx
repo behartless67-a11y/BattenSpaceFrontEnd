@@ -28,13 +28,6 @@ export function RoomAvailabilityWidget() {
     { id: "pavx-upper", name: "Pavilion X Upper Garden" },
   ];
 
-  const ROOM_ICS_MAPPING: Record<string, string> = {
-    'confa': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-    'greathall': 'https://roomres.thebattenspace.org/ics/GreatHall.ics',
-    'seminar': 'https://roomres.thebattenspace.org/ics/SeminarRoom.ics',
-    'studentlounge206': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-    'pavx-upper': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  };
 
   useEffect(() => {
     const fetchRoomStatus = async () => {
@@ -44,12 +37,7 @@ export function RoomAvailabilityWidget() {
 
         for (const room of ROOM_CONFIG) {
           try {
-            const icsUrl = ROOM_ICS_MAPPING[room.id];
-            if (!icsUrl) {
-              roomStatuses.push({ name: room.name, available: true });
-              continue;
-            }
-            const response = await fetch(icsUrl, { cache: 'no-cache', mode: 'cors' });
+            const response = await fetch(`/api/calendar?room=${room.id}`, { cache: 'no-cache' });
 
             if (!response.ok) {
               roomStatuses.push({ name: room.name, available: true });

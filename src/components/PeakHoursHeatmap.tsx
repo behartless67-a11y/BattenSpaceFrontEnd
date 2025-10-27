@@ -14,17 +14,7 @@ const ROOMS = [
   { id: 'pavx-exhibit', name: 'Pav X Exhibit' },
 ];
 
-// ICS files are publicly available at roomres.thebattenspace.org
-const ROOM_ICS_MAPPING: Record<string, string> = {
-  'confa': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'greathall': 'https://roomres.thebattenspace.org/ics/GreatHall.ics',
-  'seminar': 'https://roomres.thebattenspace.org/ics/SeminarRoom.ics',
-  'studentlounge206': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'pavx-upper': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'pavx-b1': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'pavx-b2': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-  'pavx-exhibit': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
-};
+// Use API proxy to fetch ICS files (bypasses CORS restrictions)
 
 const HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -131,12 +121,7 @@ export function PeakHoursHeatmap({ selectedRoom }: PeakHoursHeatmapProps) {
       await Promise.all(
         ROOMS.map(async (room) => {
           try {
-            const icsUrl = ROOM_ICS_MAPPING[room.id];
-            if (!icsUrl) {
-              allData[room.id] = {};
-              return;
-            }
-            const response = await fetch(icsUrl, { mode: 'cors' });
+            const response = await fetch(`/api/calendar?room=${room.id}`);
             if (!response.ok) {
               allData[room.id] = {};
               return;

@@ -295,6 +295,61 @@ For issues or questions:
 
 ## Development Log
 
+### 2025-01-27
+- **Room Analytics - Major Data Source Migration**:
+  - **Problem**: Room analytics page (https://www.thebattenspace.org/room-analytics) stopped working after switching from Azure Function to Git-based ICS files
+  - **Root Cause**: Components were using old Azure Function endpoints and pointing to wrong ICS file URLs at roomres.thebattenspace.org
+  - **Solution**: Migrated all components to use Outlook calendar direct URLs
+
+- **ICS Calendar URL Migration**:
+  - Changed from: `https://roomres.thebattenspace.org/ics/{filename}.ics` (only 3 files existed: ConfA.ics, GreatHall.ics, SeminarRoom.ics)
+  - Changed to: Direct Outlook calendar URLs in format: `https://outlook.office365.com/owa/calendar/{id}@virginia.edu/{token}/calendar.ics`
+  - Updated variable naming: `ROOM_ICS_FILES` + `ICS_BASE_URL` → `ROOM_ICS_URLS` (full URLs)
+
+- **Room Data Accuracy Fixes**:
+  - **Issue 1**: Student Lounge and Pavilion X rooms showing 0.0 hours or NaN data
+    - All rooms were incorrectly mapped to ConfA.ics which didn't contain their events
+    - Fixed by providing each room its own dedicated Outlook calendar URL
+  - **Issue 2**: All rooms showing same data (13.3 hours per day)
+    - Multiple rooms sharing same ICS file were counting ALL events instead of filtering by room
+    - Added `ROOM_IDENTIFIERS` mapping (e.g., 'confa': 'FBS-ConfA-L014')
+    - Implemented `filterEventsByRoom()` function to filter events by LOCATION field
+  - **Issue 3**: Location field not being included in parsed events
+    - Added `location?: string` to CalendarEvent interface in all components
+    - Added LOCATION field parsing in ICS content parsers: `} else if (key === 'LOCATION') { currentEvent.location = value; }`
+    - Ensured location is included in both regular events and recurring event instances
+    - This was CRITICAL - events were being filtered out because location was undefined
+
+- **Components Updated** (7 total):
+  1. `RoomStats.tsx` - Main room statistics component
+  2. `CurrentStatus.tsx` - Real-time room occupancy status
+  3. `UsageTrends.tsx` - Historical usage trend charts
+  4. `CapacityAnalysis.tsx` - Room utilization and capacity metrics
+  5. `PeakHoursHeatmap.tsx` - Day/hour usage heatmap visualization
+  6. `AllTimeStats.tsx` - Historical statistics and monthly breakdowns
+  7. `RoomAvailabilityWidget.tsx` - Real-time availability widget (if used)
+
+- **Room Mappings** (All 8 rooms now have correct Outlook URLs):
+  - Conference Room A (FBS-ConfA-L014)
+  - Great Hall (FBS-GreatHall-100)
+  - Seminar Room (FBS-SeminarRoom-L039)
+  - Student Lounge 206 (FBS-StudentLounge-206)
+  - Pavilion X Upper Garden (FBS-PavX-UpperGarden)
+  - Pavilion X Basement Room 1 (FBS-PavX-BasementRoom1)
+  - Pavilion X Basement Room 2 (FBS-PavX-BasementRoom2)
+  - Pavilion X Basement Exhibit (FBS-PavX-)
+
+- **Technical Implementation Details**:
+  - ICS files accessed via CORS proxy: `https://corsproxy.io/?`
+  - Events filtered by checking if `event.location.includes(roomIdentifier)`
+  - Recurring events (RRULE) properly expanded with location field preserved
+  - All components use consistent location parsing and filtering logic
+
+- **Key Learning**:
+  - The LOCATION field in ICS files is the authoritative source for room identification, NOT the SUMMARY field
+  - SUMMARY contains event names/person names (e.g., "Hartless, Ben (bh4hb)")
+  - LOCATION contains room identifier (e.g., "FBS-GreatHall-100" or "Garrett Hall; FBS-GreatHall-100")
+
 ### 2025-01-21
 - **Widget Layout Improvements**:
   - Moved Room Availability and Upcoming Events widgets below Available Tools section

@@ -14,7 +14,17 @@ const ROOMS = [
   { id: 'pavx-exhibit', name: 'Pavilion X Basement Exhibit', building: 'Pavilion X' },
 ];
 
-const AZURE_FUNCTION_URL = 'https://roomtool-calendar-function.azurewebsites.net/api/getcalendar';
+// ICS files are publicly available at roomres.thebattenspace.org
+const ROOM_ICS_MAPPING: Record<string, string> = {
+  'confa': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+  'greathall': 'https://roomres.thebattenspace.org/ics/GreatHall.ics',
+  'seminar': 'https://roomres.thebattenspace.org/ics/SeminarRoom.ics',
+  'studentlounge206': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+  'pavx-upper': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+  'pavx-b1': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+  'pavx-b2': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+  'pavx-exhibit': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+};
 
 interface CapacityMetrics {
   roomId: string;
@@ -150,7 +160,20 @@ export function CapacityAnalysis({ selectedTimeRange, selectedRoom }: CapacityAn
       const capacityMetrics = await Promise.all(
         roomsToFetch.map(async (room) => {
           try {
-            const response = await fetch(`${AZURE_FUNCTION_URL}?room=${room.id}`);
+            const icsUrl = ROOM_ICS_MAPPING[room.id];
+            if (!icsUrl) {
+              return {
+                roomId: room.id,
+                roomName: room.name,
+                building: room.building,
+                utilizationRate: 0,
+                totalHours: 0,
+                availableHours: daysToCheck * 12,
+                peakUtilization: 0,
+                recommendation: 'underutilized' as const,
+              };
+            }
+            const response = await fetch(icsUrl, { mode: 'cors' });
             if (!response.ok) {
               return {
                 roomId: room.id,

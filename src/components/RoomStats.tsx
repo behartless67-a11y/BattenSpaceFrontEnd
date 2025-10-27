@@ -15,7 +15,18 @@ const ROOMS = [
   { id: 'pavx-exhibit', name: 'Pavilion X Basement Exhibit', building: 'Pavilion X' },
 ];
 
-const AZURE_FUNCTION_URL = 'https://roomtool-calendar-function.azurewebsites.net/api/getcalendar';
+// ICS files are publicly available at roomres.thebattenspace.org
+// Mapping of room IDs to their ICS file sources
+const ROOM_ICS_MAPPING: Record<string, string> = {
+  'confa': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+  'greathall': 'https://roomres.thebattenspace.org/ics/GreatHall.ics',
+  'seminar': 'https://roomres.thebattenspace.org/ics/SeminarRoom.ics',
+  'studentlounge206': 'https://roomres.thebattenspace.org/ics/ConfA.ics', // StudentLounge events are in ConfA.ics
+  'pavx-upper': 'https://roomres.thebattenspace.org/ics/ConfA.ics', // PavX events are in ConfA.ics
+  'pavx-b1': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+  'pavx-b2': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+  'pavx-exhibit': 'https://roomres.thebattenspace.org/ics/ConfA.ics',
+};
 
 interface RoomStat {
   id: string;
@@ -398,7 +409,19 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
         roomsToFetch.map(async (room) => {
           try {
             console.log(`\n🏢 [${fetchId}] ========== FETCHING DATA FOR: ${room.name.toUpperCase()} ==========`);
-            const response = await fetch(`${AZURE_FUNCTION_URL}?room=${room.id}`);
+            const icsUrl = ROOM_ICS_MAPPING[room.id];
+            if (!icsUrl) {
+              console.error(`No ICS mapping found for room: ${room.id}`);
+              return {
+                id: room.id,
+                name: room.name,
+                building: room.building,
+                averageHoursPerDay: 0,
+                todayEvents: 0,
+                error: true,
+              };
+            }
+            const response = await fetch(icsUrl, { mode: 'cors' });
 
             if (!response.ok) {
               console.error(`Failed to fetch calendar for ${room.name}`);

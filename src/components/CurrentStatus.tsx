@@ -75,6 +75,7 @@ function parseICSContent(icsContent: string): CalendarEvent[] {
       if (currentEvent.startTime && currentEvent.endTime) {
         events.push({
           summary: currentEvent.summary || 'Untitled',
+          location: currentEvent.location,
           startTime: currentEvent.startTime,
           endTime: currentEvent.endTime,
         });

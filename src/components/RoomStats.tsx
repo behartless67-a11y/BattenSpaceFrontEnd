@@ -129,6 +129,7 @@ function expandRecurringEvent(parentEvent: CalendarEvent): CalendarEvent[] {
         // Create a new event instance
         const instance: CalendarEvent = {
           summary: parentEvent.summary || 'Untitled',
+          location: parentEvent.location,
           startTime: instanceStart,
           endTime: instanceEnd,
           duration: (instanceEnd.getTime() - instanceStart.getTime()) / (1000 * 60),
@@ -174,6 +175,7 @@ function parseICSContent(icsContent: string): CalendarEvent[] {
         const duration = (currentEvent.endTime.getTime() - currentEvent.startTime.getTime()) / (1000 * 60);
         const event: CalendarEvent = {
           summary: currentEvent.summary || 'Untitled',
+          location: currentEvent.location,
           startTime: currentEvent.startTime,
           endTime: currentEvent.endTime,
           duration,

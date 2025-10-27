@@ -30,6 +30,17 @@ const ROOM_ICS_FILES: Record<string, string> = {
   'pavx-exhibit': 'ConfA.ics',
 };
 
+const ROOM_IDENTIFIERS: Record<string, string> = {
+  'confa': 'FBS-ConfA-L014',
+  'greathall': 'FBS-GreatHall-100',
+  'seminar': 'FBS-SeminarRoom-L039',
+  'studentlounge206': 'FBS-StudentLounge-206',
+  'pavx-upper': 'FBS-PavX-UpperGarden',
+  'pavx-b1': 'FBS-PavX-BasementRoom1',
+  'pavx-b2': 'FBS-PavX-BasementRoom2',
+  'pavx-exhibit': 'FBS-PavX-',
+};
+
 interface CalendarEvent {
   summary: string;
   startTime: Date;
@@ -93,6 +104,10 @@ function parseDateString(dateStr: string): Date {
   const second = parseInt(dateStr.substring(13, 15));
 
   return new Date(Date.UTC(year, month, day, hour, minute, second));
+}
+
+function filterEventsByRoom(events: CalendarEvent[], roomIdentifier: string): CalendarEvent[] {
+  return events.filter(event => event.summary && event.summary.includes(roomIdentifier));
 }
 
 function formatTime(date: Date): string {
@@ -171,7 +186,11 @@ export function CurrentStatus({ selectedRoom }: CurrentStatusProps) {
             }
 
             const icsContent = await response.text();
-            const events = parseICSContent(icsContent);
+            const allEvents = parseICSContent(icsContent);
+
+            // Filter events for this specific room
+            const roomIdentifier = ROOM_IDENTIFIERS[room.id];
+            const events = roomIdentifier ? filterEventsByRoom(allEvents, roomIdentifier) : allEvents;
 
             // Sort events by start time
             const sortedEvents = events.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());

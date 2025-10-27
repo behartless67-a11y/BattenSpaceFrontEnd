@@ -350,6 +350,23 @@ For issues or questions:
   - SUMMARY contains event names/person names (e.g., "Hartless, Ben (bh4hb)")
   - LOCATION contains room identifier (e.g., "FBS-GreatHall-100" or "Garrett Hall; FBS-GreatHall-100")
 
+- **CapacityAnalysis Recurring Events Fix**:
+  - **Problem**: Utilization showing 0% for heavily-used rooms (Pavilion X Basement Rooms)
+  - **Root Cause**: Parser didn't handle recurring events (RRULE) - only counted one-time events
+  - **Solution**: Added `expandRecurringEvent()` function and enhanced ICS parser
+  - Most room bookings are weekly recurring meetings, so this was critical for accurate utilization metrics
+  - Parser now handles: RRULE expansion, line continuation, UID deduplication, timezone-aware dates
+
+- **Complete Outlook Calendar ICS URLs** (for reference):
+  1. Conference Room A: `https://outlook.office365.com/owa/calendar/4207f27aa0d54d318d660537325a3856@virginia.edu/64228c013c3c425ca3ec6682642a970e8523251041637520167/calendar.ics`
+  2. Great Hall: `https://outlook.office365.com/owa/calendar/cf706332e50c45009e2b3164e0b68ca0@virginia.edu/6960c19164584f9cbb619329600a490a16019380931273154626/calendar.ics`
+  3. Seminar Room: `https://outlook.office365.com/owa/calendar/4cedc3f0284648fcbee80dd7f6563bab@virginia.edu/211f4d478ee94feb8fe74fa4ed82a0b22636302730039956374/calendar.ics`
+  4. Student Commons 206: `https://outlook.office365.com/owa/calendar/bfd63ea7933c4c3d965a632e5d6b703d@virginia.edu/05f41146b7274347a5e374b91f0e7eda6953039659626971784/calendar.ics`
+  5. Pavilion X Basement Exhibit: `https://outlook.office365.com/owa/calendar/4df4134c83844cef9d9357180ccfb48c@virginia.edu/e46a84ae5d8842d4b33a842ddc5ff66c11207228220277930183/calendar.ics`
+  6. Pavilion X Basement Room 1: `https://outlook.office365.com/owa/calendar/fa3ecb9b47824ac0a36733c7212ccc97@virginia.edu/d23afabf93da4fa4b49d2be3ce290f7911116129854936607531/calendar.ics`
+  7. Pavilion X Basement Room 2: `https://outlook.office365.com/owa/calendar/3f60cb3359dd40f7943b9de3b062b18d@virginia.edu/1e78265cf5eb44da903745ca3d872e6910017444746788834359/calendar.ics`
+  8. Pavilion X Upper Garden: `https://outlook.office365.com/owa/calendar/52b9b2d41868473fac5d3e9963512a9b@virginia.edu/311e34fd14384759b006ccf185c1db677813060047149602177/calendar.ics`
+
 ### 2025-01-21
 - **Widget Layout Improvements**:
   - Moved Room Availability and Upcoming Events widgets below Available Tools section

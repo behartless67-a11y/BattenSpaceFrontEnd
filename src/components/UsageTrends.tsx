@@ -11,7 +11,19 @@ const ROOMS = [
   { id: 'pavx-upper', name: 'Pavilion X Upper', building: 'Pavilion X', color: '#8B4513' },
 ];
 
-// Use API proxy to fetch ICS files (bypasses CORS restrictions)
+// ICS files are publicly available at roomres.thebattenspace.org
+const ICS_BASE_URL = 'https://roomres.thebattenspace.org/ics/';
+
+const ROOM_ICS_FILES: Record<string, string> = {
+  'confa': 'ConfA.ics',
+  'greathall': 'GreatHall.ics',
+  'seminar': 'SeminarRoom.ics',
+  'studentlounge206': 'ConfA.ics',
+  'pavx-upper': 'ConfA.ics',
+  'pavx-b1': 'ConfA.ics',
+  'pavx-b2': 'ConfA.ics',
+  'pavx-exhibit': 'ConfA.ics',
+};
 
 interface DailyUsage {
   date: string;
@@ -277,7 +289,11 @@ export function UsageTrends({ selectedTimeRange, selectedRoom }: UsageTrendsProp
       const roomTrends = await Promise.all(
         roomsToFetch.map(async (room) => {
           try {
-            const response = await fetch(`/api/calendar?room=${room.id}`);
+            const icsFile = ROOM_ICS_FILES[room.id];
+            if (!icsFile) {
+              return { roomId: room.id, roomName: room.name, color: room.color, dailyUsage: [] };
+            }
+            const response = await fetch(`${ICS_BASE_URL}${icsFile}`);
             if (!response.ok) {
               return {
                 roomId: room.id,

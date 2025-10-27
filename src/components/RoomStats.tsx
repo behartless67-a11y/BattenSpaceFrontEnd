@@ -15,7 +15,19 @@ const ROOMS = [
   { id: 'pavx-exhibit', name: 'Pavilion X Basement Exhibit', building: 'Pavilion X' },
 ];
 
-// Use API proxy to fetch ICS files (bypasses CORS restrictions)
+// ICS files are publicly available at roomres.thebattenspace.org
+const ICS_BASE_URL = 'https://roomres.thebattenspace.org/ics/';
+
+const ROOM_ICS_FILES: Record<string, string> = {
+  'confa': 'ConfA.ics',
+  'greathall': 'GreatHall.ics',
+  'seminar': 'SeminarRoom.ics',
+  'studentlounge206': 'ConfA.ics',
+  'pavx-upper': 'ConfA.ics',
+  'pavx-b1': 'ConfA.ics',
+  'pavx-b2': 'ConfA.ics',
+  'pavx-exhibit': 'ConfA.ics',
+};
 
 interface RoomStat {
   id: string;
@@ -398,7 +410,21 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
         roomsToFetch.map(async (room) => {
           try {
             console.log(`\n🏢 [${fetchId}] ========== FETCHING DATA FOR: ${room.name.toUpperCase()} ==========`);
-            const response = await fetch(`/api/calendar?room=${room.id}`);
+            const icsFile = ROOM_ICS_FILES[room.id];
+            if (!icsFile) {
+              console.error(`No ICS file mapping for room: ${room.id}`);
+              return {
+                id: room.id,
+                name: room.name,
+                building: room.building,
+                averageHoursPerDay: 0,
+                todayEvents: 0,
+                error: true,
+              };
+            }
+            const response = await fetch(`${ICS_BASE_URL}${icsFile}`, {
+              cache: 'no-cache'
+            });
 
             if (!response.ok) {
               console.error(`Failed to fetch calendar for ${room.name}`);

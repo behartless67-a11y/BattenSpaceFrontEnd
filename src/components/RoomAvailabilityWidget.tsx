@@ -28,6 +28,15 @@ export function RoomAvailabilityWidget() {
     { id: "pavx-upper", name: "Pavilion X Upper Garden" },
   ];
 
+  const ICS_BASE_URL = 'https://roomres.thebattenspace.org/ics/';
+  const ROOM_ICS_FILES: Record<string, string> = {
+    'confa': 'ConfA.ics',
+    'greathall': 'GreatHall.ics',
+    'seminar': 'SeminarRoom.ics',
+    'studentlounge206': 'ConfA.ics',
+    'pavx-upper': 'ConfA.ics',
+  };
+
 
   useEffect(() => {
     const fetchRoomStatus = async () => {
@@ -37,7 +46,12 @@ export function RoomAvailabilityWidget() {
 
         for (const room of ROOM_CONFIG) {
           try {
-            const response = await fetch(`/api/calendar?room=${room.id}`, { cache: 'no-cache' });
+            const icsFile = ROOM_ICS_FILES[room.id];
+            if (!icsFile) {
+              roomStatuses.push({ name: room.name, available: true });
+              continue;
+            }
+            const response = await fetch(`${ICS_BASE_URL}${icsFile}`, { cache: 'no-cache' });
 
             if (!response.ok) {
               roomStatuses.push({ name: room.name, available: true });

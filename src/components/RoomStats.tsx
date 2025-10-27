@@ -16,6 +16,8 @@ const ROOMS = [
 ];
 
 // ICS files are publicly available at roomres.thebattenspace.org
+// Using CORS proxy to bypass CORS restrictions
+const CORS_PROXY = 'https://corsproxy.io/?';
 const ICS_BASE_URL = 'https://roomres.thebattenspace.org/ics/';
 
 const ROOM_ICS_FILES: Record<string, string> = {
@@ -422,7 +424,7 @@ export function RoomStats({ selectedTimeRange, selectedRoom }: RoomStatsProps) {
                 error: true,
               };
             }
-            const response = await fetch(`${ICS_BASE_URL}${icsFile}`, {
+            const response = await fetch(`${CORS_PROXY}${encodeURIComponent(ICS_BASE_URL + icsFile)}`, {
               cache: 'no-cache'
             });
 

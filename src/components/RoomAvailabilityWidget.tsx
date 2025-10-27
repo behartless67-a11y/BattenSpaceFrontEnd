@@ -28,6 +28,7 @@ export function RoomAvailabilityWidget() {
     { id: "pavx-upper", name: "Pavilion X Upper Garden" },
   ];
 
+  const CORS_PROXY = 'https://corsproxy.io/?';
   const ICS_BASE_URL = 'https://roomres.thebattenspace.org/ics/';
   const ROOM_ICS_FILES: Record<string, string> = {
     'confa': 'ConfA.ics',
@@ -51,7 +52,7 @@ export function RoomAvailabilityWidget() {
               roomStatuses.push({ name: room.name, available: true });
               continue;
             }
-            const response = await fetch(`${ICS_BASE_URL}${icsFile}`, { cache: 'no-cache' });
+            const response = await fetch(`${CORS_PROXY}${encodeURIComponent(ICS_BASE_URL + icsFile)}`, { cache: 'no-cache' });
 
             if (!response.ok) {
               roomStatuses.push({ name: room.name, available: true });

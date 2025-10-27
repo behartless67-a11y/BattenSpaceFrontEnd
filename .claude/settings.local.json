@@ -8,7 +8,10 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git rebase:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(for file in CurrentStatus.tsx UsageTrends.tsx RoomAvailabilityWidget.tsx CapacityAnalysis.tsx PeakHoursHeatmap.tsx AllTimeStats.tsx)",
+      "Bash(do)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

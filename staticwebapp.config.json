@@ -6,6 +6,6 @@
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.azurewebsites.net https://*.virginia.edu https://*.office365.com https://*.thebattenspace.org data: blob:; connect-src 'self' https://api.open-meteo.com https://api.rss2json.com https://*.azurewebsites.net https://*.thebattenspace.org;"
+    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.azurewebsites.net https://*.virginia.edu https://*.office365.com https://*.thebattenspace.org data: blob:; connect-src 'self' https://api.open-meteo.com https://api.rss2json.com https://*.azurewebsites.net https://*.thebattenspace.org https://corsproxy.io;"
   }
 }

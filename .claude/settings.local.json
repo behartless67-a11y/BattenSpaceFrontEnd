@@ -15,7 +15,8 @@
       "Bash(for file in StudentLounge-206.ics StudentLounge.ics PavX-BasementRoom2.ics PavX-BasementRoom1.ics PavX-Upper.ics PavX-UpperGarden.ics)",
       "Bash(do echo -n \"Checking $file: \")",
       "Bash(for file in src/components/CapacityAnalysis.tsx src/components/PeakHoursHeatmap.tsx src/components/AllTimeStats.tsx)",
-      "Bash(do echo \"Updating $file\")"
+      "Bash(do echo \"Updating $file\")",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

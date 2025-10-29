@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { RoomAvailabilityWidget } from "@/components/RoomAvailabilityWidget";
 import { UpcomingEventsWidget } from "@/components/UpcomingEventsWidget";
-import { ExternalLink, Wrench, Users, FileText, BarChart, Database, Calendar, Newspaper } from "lucide-react";
+import { ExternalLink, Wrench, Users, FileText, BarChart, Database, Calendar, Newspaper, TrendingUp } from "lucide-react";
 import { UserInfo } from "@/types/auth";
 import { lookupStaffMember } from "@/lib/staffLookup";
 
@@ -20,7 +20,7 @@ interface Tool {
   name: string;
   description: string;
   url: string;
-  icon: "wrench" | "users" | "file" | "chart" | "database" | "calendar" | "link";
+  icon: "wrench" | "users" | "file" | "chart" | "database" | "calendar" | "link" | "trending";
   category: string;
   comingSoon?: boolean;
 }
@@ -51,9 +51,17 @@ const tools: Tool[] = [
     icon: "database",
     category: "Academic Resources",
   },
+  {
+    id: "4",
+    name: "Marketing & Communications",
+    description: "Track engagement metrics, social media analytics, and communications performance",
+    url: "https://lively-island-061c35c0f.3.azurestaticapps.net/",
+    icon: "trending",
+    category: "Communications",
+  },
   // Staff Directory removed from public view but still accessible at /staff-directory
   // {
-  //   id: "4",
+  //   id: "5",
   //   name: "Staff Directory",
   //   description: "Search and browse contact information for Batten School faculty and staff",
   //   url: "/staff-directory",
@@ -77,6 +85,8 @@ function getIcon(iconName: string) {
       return <Database className={iconClass} />;
     case "calendar":
       return <Calendar className={iconClass} />;
+    case "trending":
+      return <TrendingUp className={iconClass} />;
     default:
       return <ExternalLink className={iconClass} />;
   }
@@ -390,7 +400,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-uva-navy mb-2">Available Tools</h2>
               <div className="w-16 h-1 bg-uva-orange"></div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {tools.map((tool) => (
                     tool.comingSoon ? (
                       <div

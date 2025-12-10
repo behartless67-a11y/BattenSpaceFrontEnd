@@ -59,6 +59,14 @@ const tools: Tool[] = [
     icon: "trending",
     category: "Communications",
   },
+  {
+    id: "5",
+    name: "PDF Merger",
+    description: "Combine multiple documents, images, and files into a single PDF with drag-and-drop reordering",
+    url: "/pdf-merger/",
+    icon: "file",
+    category: "Productivity",
+  },
   // Staff Directory removed from public view but still accessible at /staff-directory
   // {
   //   id: "5",

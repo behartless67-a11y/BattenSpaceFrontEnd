@@ -108,27 +108,11 @@
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        // Verify libraries loaded
-        window.addEventListener('DOMContentLoaded', function() {
-            const missing = [];
-            if (typeof PDFLib === 'undefined') missing.push('pdf-lib');
-            if (typeof mammoth === 'undefined') missing.push('mammoth');
-            if (typeof XLSX === 'undefined') missing.push('xlsx');
-            if (typeof html2canvas === 'undefined') missing.push('html2canvas');
-            if (typeof jspdf === 'undefined' && typeof window.jspdf === 'undefined') missing.push('jspdf');
-
-            if (missing.length > 0) {
-                console.error('Missing libraries:', missing);
-                alert('Some required libraries failed to load: ' + missing.join(', ') + '. Please refresh the page or check your internet connection.');
-            }
-        });
-    </script>
+    <script src="lib/pdf-lib.min.js"></script>
+    <script src="lib/mammoth.browser.min.js"></script>
+    <script src="lib/xlsx.full.min.js"></script>
+    <script src="lib/html2canvas.min.js"></script>
+    <script src="lib/jspdf.umd.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

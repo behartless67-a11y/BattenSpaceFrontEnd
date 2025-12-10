@@ -687,65 +687,55 @@ main:hover {
 
 /* Site Footer */
 .site-footer {
-    background: var(--uva-navy);
+    background: rgba(35, 45, 75, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     color: white;
+    padding: 32px 0;
     margin-top: auto;
-    animation: fadeInUp 0.8s ease-out 0.4s backwards;
 }
 
 .footer-content {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 24px 32px;
+    padding: 0 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
 }
 
-.footer-brand {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+.footer-logo-wrapper {
+    flex-shrink: 0;
 }
 
 .footer-logo {
-    height: 48px;
+    height: 64px;
     width: auto;
 }
 
-.footer-title {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: 0.9rem;
+.footer-contact {
+    text-align: right;
 }
 
-.footer-subtitle {
-    font-size: 0.8rem;
+.footer-address {
+    font-size: 0.875rem;
     color: var(--gray-300);
+    margin-bottom: 4px;
+    line-height: 1.5;
 }
 
-.footer-links {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.footer-email {
     font-size: 0.875rem;
 }
 
-.footer-links a {
-    color: var(--uva-orange);
+.footer-email a {
+    color: white;
     text-decoration: none;
-    font-weight: 500;
     transition: color 0.3s ease;
 }
 
-.footer-links a:hover {
-    color: var(--uva-orange-light);
-}
-
-.footer-divider {
-    color: var(--gray-500);
+.footer-email a:hover {
+    color: var(--uva-orange);
 }
 
 /* Responsive */
@@ -806,16 +796,15 @@ main:hover {
 
     .footer-content {
         flex-direction: column;
-        text-align: center;
-        padding: 20px 16px;
+        gap: 20px;
+        padding: 0 16px;
     }
 
-    .footer-brand {
-        flex-direction: column;
-        gap: 8px;
+    .footer-contact {
+        text-align: center;
     }
 
     .footer-logo {
-        height: 40px;
+        height: 48px;
     }
 }

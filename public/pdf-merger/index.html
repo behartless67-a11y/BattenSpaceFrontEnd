@@ -8,11 +8,27 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E57200'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z'/%3E%3C/svg%3E">
 </head>
 <body>
+    <!-- Site Header -->
+    <header class="site-header">
+        <div class="header-content">
+            <a href="/" class="header-brand">
+                <h1>The Batten Space</h1>
+                <p>Frank Batten School Digital Tools</p>
+            </a>
+            <a href="/" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Tools
+            </a>
+        </div>
+    </header>
+
     <div class="container">
-        <header>
-            <h1>PDF Merger Tool</h1>
+        <div class="page-header">
+            <h2>PDF Merger Tool</h2>
             <p>Upload documents and images to combine them into a single PDF</p>
-        </header>
+        </div>
 
         <main>
             <div class="upload-zone" id="uploadZone">
@@ -34,7 +50,7 @@
 
             <div class="files-section" id="filesSection">
                 <div class="files-header">
-                    <h2>Files to Merge</h2>
+                    <h3>Files to Merge</h3>
                     <span class="file-count" id="fileCount">0 files</span>
                 </div>
                 <p class="drag-hint">Drag to reorder files</p>
@@ -74,8 +90,22 @@
         </div>
     </div>
 
-    <footer>
-        <p>Part of <a href="../BattenSpaceFrontEnd/index.html">The Batten Space</a> Tools</p>
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="/bat_rgb_ko.png" alt="Batten School Logo" class="footer-logo">
+                <div>
+                    <p class="footer-title">Frank Batten School of Leadership and Public Policy</p>
+                    <p class="footer-subtitle">University of Virginia</p>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href="https://batten.virginia.edu" target="_blank" rel="noopener noreferrer">batten.virginia.edu</a>
+                <span class="footer-divider">|</span>
+                <a href="mailto:battenspace@virginia.edu">battenspace@virginia.edu</a>
+            </div>
+        </div>
     </footer>
 
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>

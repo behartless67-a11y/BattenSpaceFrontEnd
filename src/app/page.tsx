@@ -408,7 +408,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-uva-navy mb-2">Available Tools</h2>
               <div className="w-16 h-1 bg-uva-orange"></div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
               {tools.map((tool) => (
                     tool.comingSoon ? (
                       <div
@@ -420,25 +420,25 @@ export default function Home() {
                           Coming Soon
                         </div>
 
-                        <div className="p-6 h-full flex flex-col">
+                        <div className="p-4 h-full flex flex-col">
                           <div className="flex flex-col items-center text-center mb-auto">
                             {/* Icon with gradient background */}
-                            <div className="relative mb-4">
-                              <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white shadow-md">
+                            <div className="relative mb-3">
+                              <div className="relative w-12 h-12 rounded-lg bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white shadow-md">
                                 {getIcon(tool.icon)}
                               </div>
                             </div>
 
-                            <h3 className="text-lg font-bold text-gray-600 mb-2">
+                            <h3 className="text-base font-bold text-gray-600 mb-1">
                               {tool.name}
                             </h3>
-                            <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                            <p className="text-gray-500 text-xs leading-relaxed mb-3">
                               {tool.description}
                             </p>
                           </div>
 
                           {/* Coming Soon indicator */}
-                          <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-200 text-gray-400 font-semibold text-sm">
+                          <div className="flex items-center justify-center gap-2 pt-3 border-t border-gray-200 text-gray-400 font-semibold text-xs">
                             <span>Coming Soon</span>
                           </div>
                         </div>
@@ -454,26 +454,26 @@ export default function Home() {
                         {/* Decorative corner accent */}
                         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-uva-orange/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                        <div className="p-6 h-full flex flex-col">
+                        <div className="p-4 h-full flex flex-col">
                           <div className="flex flex-col items-center text-center mb-auto">
                             {/* Icon with gradient background */}
-                            <div className="relative mb-4">
-                              <div className="absolute inset-0 bg-gradient-to-br from-uva-orange to-uva-navy rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"></div>
-                              <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-uva-navy to-uva-navy/80 group-hover:from-uva-orange group-hover:to-uva-orange/80 transition-all duration-300 flex items-center justify-center text-white shadow-md">
+                            <div className="relative mb-3">
+                              <div className="absolute inset-0 bg-gradient-to-br from-uva-orange to-uva-navy rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"></div>
+                              <div className="relative w-12 h-12 rounded-lg bg-gradient-to-br from-uva-navy to-uva-navy/80 group-hover:from-uva-orange group-hover:to-uva-orange/80 transition-all duration-300 flex items-center justify-center text-white shadow-md">
                                 {getIcon(tool.icon)}
                               </div>
                             </div>
 
-                            <h3 className="text-lg font-bold text-uva-navy mb-2 group-hover:text-uva-orange transition-colors">
+                            <h3 className="text-base font-bold text-uva-navy mb-1 group-hover:text-uva-orange transition-colors">
                               {tool.name}
                             </h3>
-                            <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                            <p className="text-gray-600 text-xs leading-relaxed mb-3">
                               {tool.description}
                             </p>
                           </div>
 
                           {/* Call to action */}
-                          <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100 text-uva-orange font-semibold text-sm">
+                          <div className="flex items-center justify-center gap-2 pt-3 border-t border-gray-100 text-uva-orange font-semibold text-xs">
                             <span className="group-hover:translate-x-1 transition-transform">
                               Launch
                             </span>

@@ -437,7 +437,7 @@ ${this.escapeHtml(text)}
         // A4 dimensions in mm
         const pageWidth = 210;
         const pageHeight = 297;
-        const margin = 20; // 20mm margins on all sides
+        const margin = 25.4; // 1 inch (APA standard) margins on all sides
         const contentWidth = pageWidth - (margin * 2); // 170mm content width
 
         // Create a temporary container with proper width for rendering
@@ -635,7 +635,7 @@ ${this.escapeHtml(text)}
         // A4 dimensions in points
         const pageWidth = 595;
         const pageHeight = 842;
-        const margin = 56; // ~20mm margin in points
+        const margin = 72; // 1 inch (APA standard) margin in points
 
         const imgDims = image.scale(1);
         let width = imgDims.width;
